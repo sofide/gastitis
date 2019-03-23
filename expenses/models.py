@@ -19,7 +19,7 @@ class Expense(models.Model):
     description = models.TextField()
     amount = models.DecimalField(decimal_places=2, max_digits=256)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    date = models.DateField()
+    date = models.DateField(auto_now=True)
     created_date = models.DateField(auto_now=True)
 
     class Meta:
