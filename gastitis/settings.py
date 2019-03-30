@@ -14,8 +14,6 @@ import os
 import django_heroku
 
 
-from bot.secret_token import TESTING_BOT_TOKEN
-BOT_TOKEN = TESTING_BOT_TOKEN
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -128,4 +126,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Heroku settings
+if os.environ.get('HEROKU'):
+    BOT_TOKEN = os.environ.get('BOT_TOKEN')
+else:
+    from bot.secret_token import TESTING_BOT_TOKEN
+    BOT_TOKEN = TESTING_BOT_TOKEN
+
+
 django_heroku.settings(locals())
