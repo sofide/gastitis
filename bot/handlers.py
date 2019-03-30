@@ -3,9 +3,8 @@ Telegram bot logic.
 """
 import logging
 
-from django.conf import settings
 from django.contrib.auth.models import User
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import CommandHandler, MessageHandler, Filters
 
 from bot.models import TelegramUser
 from expenses.models import Expense
@@ -13,6 +12,9 @@ from expenses.models import Expense
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
+
+HANDLERS = [
+]
 
 def get_user(update):
     user_data = update.message.from_user
@@ -34,9 +36,6 @@ def get_user(update):
     return user
 
 
-updater = Updater(token=settings.BOT_TOKEN, use_context=True)
-
-dispatcher = updater.dispatcher
 
 def start(update, context):
     logging.info('blabla')
@@ -47,22 +46,19 @@ def start(update, context):
     context.bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
 
-start_handler = CommandHandler('start', start)
-dispatcher.add_handler(start_handler)
+HANDLERS.append(CommandHandler('start', start))
 
 def echo(update, context):
     context.bot.send_message(chat_id=update.message.chat_id, text=update.message.text)
 
-echo_handler = MessageHandler(Filters.text, echo)
-dispatcher.add_handler(echo_handler)
+HANDLERS.append(MessageHandler(Filters.text, echo))
 
 
 def caps(update, context):
     text_caps = ' '.join(context.args).upper()
     context.bot.send_message(chat_id=update.message.chat_id, text=text_caps)
 
-caps_handler = CommandHandler('caps', caps)
-dispatcher.add_handler(caps_handler)
+HANDLERS.append(CommandHandler('caps', caps))
 
 def load_expense(update, context):
     user = get_user(update)
@@ -93,8 +89,7 @@ def load_expense(update, context):
 
 
 
-expense_handler = CommandHandler('cargar', load_expense)
-dispatcher.add_handler(expense_handler)
+HANDLERS.append(CommandHandler('cargar', load_expense))
 
 
 
@@ -102,5 +97,4 @@ dispatcher.add_handler(expense_handler)
 def unknown(update, context):
     context.bot.send_message(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
 
-unknown_handler = MessageHandler(Filters.command, unknown)
-dispatcher.add_handler(unknown_handler)
+HANDLERS.append(MessageHandler(Filters.command, unknown))
