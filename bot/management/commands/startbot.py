@@ -1,4 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+
+from bot.bot import Bot
 
 
 class Command(BaseCommand):
@@ -6,5 +8,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('Vamos a arrancar con el bot'))
-        from bot.bot import updater
-        updater.start_polling()
+        Bot()
