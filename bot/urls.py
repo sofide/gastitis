@@ -4,5 +4,5 @@ from django.urls import path, include
 from bot.views import webhook
 
 urlpatterns = [
-    path('(?P<token>.+)/', webhook),
+    path('<token>/', webhook),
 ]
