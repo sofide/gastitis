@@ -1,7 +1,7 @@
 import json
 
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
@@ -15,3 +15,4 @@ def webhook(request, token):
         raise Http404()
     bot = Bot()
     bot.webhook(json.loads(request.body.decode('utf-8')))
+    return JsonResponse({'status':'ok'})
