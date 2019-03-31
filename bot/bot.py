@@ -17,7 +17,7 @@ class Bot:
 
         else:
             self.bot.set_webhook('{}/{}/{}/'.format(settings.SITE_DOMAIN, 'bot', token))
-            self.dispatcher = Dispatcher(self.bot, None, workers=0)
+            self.dispatcher = Dispatcher(self.bot, None, workers=0, use_context=True)
 
         for handler in HANDLERS:
             self.dispatcher.add_handler(handler)
