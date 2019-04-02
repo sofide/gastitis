@@ -1,11 +1,14 @@
 from django.db import models
 
+from bot.models import TelegramGroup
 
-class Category(models.Model):
+
+class Tag(models.Model):
     """
-    Expenses categories, to keep track grouped expensives, and compare them in different periods.
+    Expenses tag, to keep track grouped expensives, and compare them in different periods.
     """
     name = models.CharField(max_length=256)
+    group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='tags')
 
     class Meta:
         ordering = ['name']
@@ -15,10 +18,11 @@ class Category(models.Model):
 
 
 class Expense(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='expenses')
+    group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='expenses')
     description = models.TextField()
     amount = models.DecimalField(decimal_places=2, max_digits=256)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
+    tags = models.ManyToManyField(Tag, related_name='expenses')
     date = models.DateField(auto_now=True)
     created_date = models.DateField(auto_now=True)
 
