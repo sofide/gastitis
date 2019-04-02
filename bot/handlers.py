@@ -3,10 +3,9 @@ Telegram bot logic.
 """
 import logging
 
-from django.contrib.auth.models import User
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
-from bot.utils import get_user_and_group
+from bot.utils import user_and_group
 from expenses.models import Expense
 
 
@@ -16,10 +15,13 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 HANDLERS = [
 ]
 
-def start(update, context):
-    logging.info('[ /start ]: %s', update)
 
-    user, group = get_user_and_group(update)
+@user_and_group
+def start(update, context, user, group):
+    logging.info('[ /start ]: %s', update)
+    logging.info('[ /start ]: user: %s', user)
+    logging.info('[ /start ]: grop: %s', group)
+
     context.bot.send_message(chat_id=update.message.chat_id, text="Hi {}".format(user))
     context.bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
@@ -40,8 +42,8 @@ def caps(update, context):
 HANDLERS.append(CommandHandler('caps', caps))
 
 
-def load_expense(update, context):
-    user, group = get_user_and_group(update)
+@user_and_group
+def load_expense(update, context, user, group):
     if not context.args:
         context.bot.send_message(chat_id=update.message.chat_id, text='dame precio y desc')
         return
@@ -62,7 +64,7 @@ def load_expense(update, context):
         return
 
     description = ' '.join(description)
-    expense = Expense(user=user, description=description, amount=amount)
+    expense = Expense(user=user, group=group, description=description, amount=amount)
     expense.save()
     text = 'se guardo tu gasto {}'.format(expense)
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
