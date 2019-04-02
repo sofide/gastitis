@@ -6,7 +6,7 @@ import logging
 from django.contrib.auth.models import User
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
-from bot.models import TelegramUser
+from bot.models import TelegramUser, TelegramGroup
 from expenses.models import Expense
 
 
@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 HANDLERS = [
 ]
 
-def get_user(update):
+def get_user_and_group(update):
     user_data = update.message.from_user
     chat_id = user_data.id
     first_name = getattr(user_data, 'first_name', chat_id)
@@ -32,16 +32,24 @@ def get_user(update):
         user=user, chat_id=chat_id, defaults={
             'username': telegram_username
         })
+    group_data = update.message.chat
+    group_id = group_data.id
+    group_name = group_data.title
 
-    return user
+    group, _ = TelegramGroup.objects.get_or_create(chat_id=group_id, defaults={
+        'name': group_name,
+    })
+    group.users.add(user)
+
+
+    return user, group
 
 
 
 def start(update, context):
-    logging.info('blabla')
-    logging.info('update: %s', update)
+    logging.info('[ /start ]: %s', update)
 
-    user = get_user(update)
+    user, group = get_user_and_group(update)
     context.bot.send_message(chat_id=update.message.chat_id, text="Hi {}".format(user))
     context.bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
@@ -49,6 +57,7 @@ def start(update, context):
 HANDLERS.append(CommandHandler('start', start))
 
 def echo(update, context):
+    logging.info('[ echo ]: %s', update)
     context.bot.send_message(chat_id=update.message.chat_id, text=update.message.text)
 
 HANDLERS.append(MessageHandler(Filters.text, echo))
@@ -61,7 +70,7 @@ def caps(update, context):
 HANDLERS.append(CommandHandler('caps', caps))
 
 def load_expense(update, context):
-    user = get_user(update)
+    user, group = get_user_and_group(update)
     if not context.args:
         context.bot.send_message(chat_id=update.message.chat_id, text='dame precio y desc')
         return
