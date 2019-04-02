@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 
 from bot.models import TelegramUser, TelegramGroup
+from expenses.models import Expense
 
 
 def user_and_group(func):
@@ -37,3 +38,32 @@ def user_and_group(func):
         func(update, context, user, group)
 
     return wrapper
+
+
+def new_expense(params, user, group):
+    """
+    Check if params are valid and create a new expense.
+
+    Returns a text to send to the user.
+    """
+    if not params:
+        return 'Necesito que me digas cuanto pagaste y una descripción del gasto.'
+
+    amount_received, *description = params
+
+    try:
+        amount = amount_received.replace(',', '.')
+        amount = float(amount)
+
+    except ValueError:
+        return 'El primer valor que me pasas después del comando tiene que ser el valor de lo '\
+               'que pagaste, "{}" no es un número válido.'.format(amount_received)
+
+    if not description:
+        return 'Necesito que agregues una descripción del gasto.'
+
+    description = ' '.join(description)
+    expense = Expense(user=user, group=group, description=description, amount=amount)
+    expense.save()
+
+    return 'Se guardo tu gasto {}'.format(expense)
