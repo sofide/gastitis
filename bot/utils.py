@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 from bot.models import TelegramUser, TelegramGroup
 from expenses.models import Expense
@@ -67,3 +68,29 @@ def new_expense(params, user, group):
     expense.save()
 
     return 'Se guardo tu gasto {}'.format(expense)
+
+
+def show_expenses(group, *params):
+    """
+    Return a text with expenses processed and filtered according to params.
+    """
+    group_expenses_qs = Expense.objects.filter(group=group)
+    if not group_expenses_qs.exists():
+        return "Todavía no hay gastos cargados en este grupo"
+    first_expense = group_expenses_qs.first()
+    total_expenses = group_expenses_qs.aggregate(Sum('amount'))['amount__sum']
+    total_expenses = round(total_expenses, 2)
+    user_expenses = {}
+    if group.users.count() > 1:
+        for user in group.users.all():
+            user_expense_qs = group_expenses_qs.filter(user=user)
+            user_amount = user_expense_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+            user_amount = round(user_amount, 2)
+            user_expenses[user.username] = user_amount
+
+    text = "Gastos desde el {} hasta ahora".format(first_expense.date)
+    text += "\n\nTotal: ${}\n".format(total_expenses)
+    for user, total in user_expenses.items():
+        text += "\n\n{}: ${} ({}%)".format(user, total, round(total/total_expenses*100))
+
+    return text

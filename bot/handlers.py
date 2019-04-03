@@ -5,7 +5,7 @@ import logging
 
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
-from bot.utils import user_and_group, new_expense
+from bot.utils import user_and_group, new_expense, show_expenses
 from expenses.models import Expense
 
 
@@ -37,6 +37,15 @@ def load_expense(update, context, user, group):
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 HANDLERS.append(CommandHandler('gasto', load_expense))
+HANDLERS.append(CommandHandler('g', load_expense))
+
+
+@user_and_group
+def total_expenses(update, context, user, group):
+    text = show_expenses(group)
+    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+
+HANDLERS.append(CommandHandler('total', total_expenses))
 
 
 def unknown(update, context):
