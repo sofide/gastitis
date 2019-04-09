@@ -23,7 +23,7 @@ class Expense(models.Model):
     description = models.TextField()
     amount = models.DecimalField(decimal_places=2, max_digits=256)
     tags = models.ManyToManyField(Tag, related_name='expenses')
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     created_date = models.DateField(auto_now=True)
 
     class Meta:

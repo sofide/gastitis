@@ -1,8 +1,11 @@
+import datetime as dt
+
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
+from bot.exceptions import ParameterError
 from bot.models import TelegramUser, TelegramGroup
-from expenses.models import Expense
+from expenses.models import Expense, Tag
 
 
 def user_and_group(func):
@@ -47,27 +50,93 @@ def new_expense(params, user, group):
 
     Returns a text to send to the user.
     """
+    try:
+        data = decode_expense_params(params, group)
+    except ParameterError as e:
+        return str(e)
+
+    amount = data['amount']
+    description = data['description']
+    date = data['dd']
+    tags = data['tt']
+    expense = Expense(user=user, group=group, description=description, amount=amount, date=date)
+    expense.save()
+    if tags:
+        for tag in tags:
+            expense.tags.add(tag)
+
+    return 'Se guardó tu gasto {}'.format(expense)
+
+
+def decode_expense_params(params, group):
+    """
+    Process command params in expense's attributes, and return a dict with the following data:
+    amount = expense amount.
+    dd = date or None
+    tt = Tag instance or None
+    description = string, expense description
+    """
+    # define special arguments and help texts for them
+    special_arguments = {
+        'dd': 'Colocar la fecha en la que se generó el gasto después del argumento "dd"',
+        'tt': 'Luego de "tt" colocar el nombre de la/las etiqueta/s para el gasto que estás '\
+        'cargando. Podés ingresar más de una etiqueta separando los nombres por comas (sin '\
+        'espacio).',
+    }
+
+    data = {}
+
     if not params:
-        return 'Necesito que me digas cuanto pagaste y una descripción del gasto.'
+        text = 'Necesito que me digas cuanto pagaste y una descripción del gasto.'
+        raise ParameterError(text)
 
-    amount_received, *description = params
-
+    # handle amount
+    amount_received, *params = params
     try:
         amount = amount_received.replace(',', '.')
-        amount = float(amount)
-
+        data['amount'] = float(amount)
     except ValueError:
         return 'El primer valor que me pasas después del comando tiene que ser el valor de lo '\
                'que pagaste, "{}" no es un número válido.'.format(amount_received)
 
-    if not description:
-        return 'Necesito que agregues una descripción del gasto.'
+    #look for special arguments
+    for argument, text in special_arguments.items():
+        try:
+            argument_position = params.index(argument)
+            params.pop(argument_position)
+            data[argument] = params.pop(argument_position)
 
-    description = ' '.join(description)
-    expense = Expense(user=user, group=group, description=description, amount=amount)
-    expense.save()
+        except ValueError:
+            data[argument] = None
+        except IndexError:
+            raise ParameterError(text)
 
-    return 'Se guardo tu gasto {}'.format(expense)
+    # handle description
+    if not params:
+        raise ParameterError('Necesito que agregues en el comando una descripción del gasto')
+
+    data['description'] = ' '.join(params)
+
+    # handle date
+    if data['dd']:
+        try:
+            data['dd'] = dt.datetime.strptime(data['dd'], '%d/%m/%y').date()
+        except ValueError:
+            text = 'Luego del parámetro "dd" necesito que ingreses la fecha del gasto que estás '\
+                   'cargando con formato "dd/mm/yy" (Por ejemplo 28/01/99).'
+            raise ParameterError(text)
+    else:
+        data['dd'] = dt.date.today()
+
+    # handle tags
+    if data['tt']:
+        tags_list = []
+        for t in data['tt'].split(','):
+            tag_instnce, _ = Tag.objects.get_or_create(name=data['tt'], group=group)
+            tags_list.append(tag_instnce)
+        data['tt'] = tags_list
+
+    return data
 
 
 def show_expenses(group, *params):
