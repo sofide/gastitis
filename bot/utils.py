@@ -146,7 +146,7 @@ def show_expenses(group, *params):
     group_expenses_qs = Expense.objects.filter(group=group)
     if not group_expenses_qs.exists():
         return "Todavía no hay gastos cargados en este grupo"
-    first_expense = group_expenses_qs.first()
+    first_expense = group_expenses_qs.last() # first expense is the last one (reverse date order)
     total_expenses = group_expenses_qs.aggregate(Sum('amount'))['amount__sum']
     total_expenses = round(total_expenses, 2)
     user_expenses = {}
