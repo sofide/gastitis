@@ -17,6 +17,19 @@ class Tag(models.Model):
         return self.name
 
 
+class Currency(models.Model):
+    """
+    Currencies and pesos exchange rates history.
+    """
+    OPTIONS = {
+        'u': 'usd',
+        'y': 'yen',
+    }
+    currency = models.CharField(max_length=1, choices=OPTIONS.items())
+    exchange_rate = models.DecimalField(decimal_places=4, max_digits=10)
+    date = models.DateField()
+
+
 class Expense(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='expenses')
     group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='expenses')
@@ -25,6 +38,10 @@ class Expense(models.Model):
     tags = models.ManyToManyField(Tag, related_name='expenses')
     date = models.DateField()
     created_date = models.DateField(auto_now=True)
+
+    # fields that represent an expense in a currency different from default.
+    original_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
+    original_amount = models.DecimalField(decimal_places=2, max_digits=256, null=True)
 
     class Meta:
         ordering = ['-date', 'amount']
