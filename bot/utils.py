@@ -180,7 +180,13 @@ def get_amount_and_currency(raw_amount):
         original_amount = Decimal(original_amount)
     except InvalidOperation:
         text = 'El primer valor que me pasas después del comando tiene que ser el valor de lo '\
-               'que pagaste, "{}" no es un número válido.'.format(amount_without_currency)
+               'que pagaste. \n\n También podés especificar un tipo de cambio con el codigo y '\
+                ' monto, por ejemplo 40u para 40 dolares (o usd40). \n Los códigos posibles son:'
+        for k, v in CURRENCY.items():
+            text += '\n - {} ({})'.format(k, v)
+            text += '\n - {}'.format(v)
+
+        text += '\n\n El valor "{}" no es un número válido.'.format(amount_without_currency)
         raise ParameterError(text)
     if exchange_rate:
         amount = original_amount * exchange_rate.rate
