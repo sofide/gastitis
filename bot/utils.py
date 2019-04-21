@@ -56,20 +56,29 @@ def new_expense(params, user, group):
     except ParameterError as e:
         return str(e)
 
+    response_text = ''
     amount = data['amount']
     description = data['description']
     date = data['dd']
     tags = data['tt']
     expense = Expense(user=user, group=group, description=description, amount=amount, date=date)
     if data['exchange_rate']:
-        expense.original_currency = data['exchange_rate'].currency
+        exchange_rate = data['exchange_rate']
+        expense.original_currency = exchange_rate.currency
         expense.original_amount = data['original_amount']
+        response_text += 'Tu gasto se convirtió a {} usando un tipo de cambio = ${} (cargado el ' \
+            '{}).\n\n'.format(
+                CURRENCY[exchange_rate.currency],
+                exchange_rate.rate,
+                exchange_rate.date
+            )
     expense.save()
     if tags:
         for tag in tags:
             expense.tags.add(tag)
 
-    return 'Se guardó tu gasto {}'.format(expense)
+    response_text += 'Se guardó tu gasto {}'.format(expense)
+    return response_text
 
 
 def decode_expense_params(params, group):
