@@ -3,6 +3,13 @@ from django.db import models
 from bot.models import TelegramGroup
 
 
+# Define accepted currency. Keys must have one character long.
+CURRENCY = {
+    'u': 'usd',
+    'y': 'yen',
+}
+
+
 class Tag(models.Model):
     """
     Expenses tag, to keep track grouped expensives, and compare them in different periods.
@@ -17,16 +24,12 @@ class Tag(models.Model):
         return self.name
 
 
-class Currency(models.Model):
+class ExchangeRate(models.Model):
     """
-    Currencies and pesos exchange rates history.
+    Exchange rates for currencies different from default.
     """
-    OPTIONS = {
-        'u': 'usd',
-        'y': 'yen',
-    }
-    currency = models.CharField(max_length=1, choices=OPTIONS.items())
-    exchange_rate = models.DecimalField(decimal_places=4, max_digits=10)
+    currency = models.CharField(max_length=1, choices=CURRENCY.items())
+    rate = models.DecimalField(decimal_places=4, max_digits=10)
     date = models.DateField()
 
 
@@ -37,10 +40,10 @@ class Expense(models.Model):
     amount = models.DecimalField(decimal_places=2, max_digits=256)
     tags = models.ManyToManyField(Tag, related_name='expenses')
     date = models.DateField()
-    created_date = models.DateField(auto_now=True)
+    created_date = models.DateTimeField(auto_now=True)
 
     # fields that represent an expense in a currency different from default.
-    original_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
+    original_currency = models.CharField(max_length=1, choices=CURRENCY.items(), null=True)
     original_amount = models.DecimalField(decimal_places=2, max_digits=256, null=True)
 
     class Meta:
