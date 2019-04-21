@@ -23,8 +23,9 @@ def start(update, context, user, group):
     text += "\n\nEste es un proyecto de juguete. Es para uso personal, y todavía se encuentra " \
             "desarrollo. No se ofrecen garantías de seguridad ni de privacidad. Usalo bajo tu " \
             "propio riesgo."
-    text += "\n\nThis is a toy project, it's for personal use and it is still in development. " \
-            "There isn't any waranty of security or privacy. Use it under your own risk."
+    text += "\n\nThis is a toy project, it's for personal use and it is still under " \
+            "development. There aren't any waranties of security or privacy. Use it under " \
+            "own risk."
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
