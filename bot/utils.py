@@ -1,11 +1,12 @@
 import datetime as dt
+from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
 from bot.exceptions import ParameterError
 from bot.models import TelegramUser, TelegramGroup
-from expenses.models import Expense, Tag
+from expenses.models import Expense, Tag, ExchangeRate, CURRENCY
 
 
 def user_and_group(func):
@@ -60,6 +61,9 @@ def new_expense(params, user, group):
     date = data['dd']
     tags = data['tt']
     expense = Expense(user=user, group=group, description=description, amount=amount, date=date)
+    if data['exchange_rate']:
+        expense.original_currency = data['exchange_rate'].currency
+        expense.original_amount = data['original_amount']
     expense.save()
     if tags:
         for tag in tags:
@@ -92,12 +96,11 @@ def decode_expense_params(params, group):
 
     # handle amount
     amount_received, *params = params
-    try:
-        amount = amount_received.replace(',', '.')
-        data['amount'] = float(amount)
-    except ValueError:
-        return 'El primer valor que me pasas después del comando tiene que ser el valor de lo '\
-               'que pagaste, "{}" no es un número válido.'.format(amount_received)
+
+    amount, exchange_rate, original_amount = get_amount_and_currency(amount_received)
+    data['amount'] = amount
+    data['exchange_rate'] = exchange_rate
+    data['original_amount'] = original_amount
 
     #look for special arguments
     for argument, text in special_arguments.items():
@@ -137,6 +140,45 @@ def decode_expense_params(params, group):
         data['tt'] = tags_list
 
     return data
+
+
+def get_amount_and_currency(raw_amount):
+    """
+    Given a string it returns an amount (in the default currency), the original amount  and a
+    ExchangeRate instance.  If the string doesn't have a currency specified, it assumes the
+    default currency and returns None as ExchangeRate.
+
+    Params:
+        - raw_amount = string of an amount (it may have a currency)
+    Returns:
+        - amount = Decimal number that represent the amount in the default currency.
+        - exchange_rate = an exchange rate instance or None if the amount is in the default
+        currency.
+        - original_amount = the raw amount received, converted in Decimal.
+    """
+    for key, value in CURRENCY.items():
+        if raw_amount.startswith((key, value)) or raw_amount.endswith((key, value)):
+            # TODO: get current exchanger rate from api.
+            exchange_rate = ExchangeRate.objects.filter(currency=key).last()
+            break
+    else:
+        key, value = ['', '']
+        exchange_rate = None
+    amount_without_currency = raw_amount.replace(value, '').replace(key, '')
+
+    try:
+        original_amount = amount_without_currency.replace(',', '.')
+        original_amount = Decimal(original_amount)
+    except InvalidOperation:
+        text = 'El primer valor que me pasas después del comando tiene que ser el valor de lo '\
+               'que pagaste, "{}" no es un número válido.'.format(amount_without_currency)
+        raise ParameterError(text)
+    if exchange_rate:
+        amount = original_amount * exchange_rate.rate
+    else:
+        amount = original_amount
+
+    return amount, exchange_rate, original_amount
 
 
 def show_expenses(group, *params):
