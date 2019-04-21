@@ -32,6 +32,9 @@ class ExchangeRate(models.Model):
     rate = models.DecimalField(decimal_places=4, max_digits=10)
     date = models.DateField()
 
+    class Meta:
+        ordering = ['date']
+
 
 class Expense(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='expenses')
