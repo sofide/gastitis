@@ -12,7 +12,7 @@ CURRENCY = {
 
 class Tag(models.Model):
     """
-    Expenses tag, to keep track grouped expensives, and compare them in different periods.
+    Expenses tag, to keep track of grouped expenses, and compare them in different periods.
     """
     name = models.CharField(max_length=256)
     group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='tags')
