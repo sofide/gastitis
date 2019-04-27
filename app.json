@@ -1,0 +1,12 @@
+{
+  "name": "Gastitis",
+  "description": "Telegram as a tool to track your expenses",
+  "repository": "https://github.com/sofide/gastitis",
+  "keywords": ["expenses", "django", "python"],
+  "env": {
+    "HEROKU": {
+      "description": "Indicates the app is running on Heroku",
+      "value": "True"
+    }
+  }
+}
