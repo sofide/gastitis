@@ -7,5 +7,6 @@ class Command(BaseCommand):
     help = 'Start testing bot.'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('Vamos a arrancar con el bot'))
+        self.stdout.write(self.style.WARNING('Starting bot...'))
         Bot()
+        self.stdout.write(self.style.SUCCESS('Bot started'))
