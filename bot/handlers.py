@@ -5,7 +5,8 @@ import logging
 
 from telegram.ext import CommandHandler, MessageHandler, Filters
 
-from bot.utils import user_and_group, new_expense, show_expenses
+from bot.utils import (user_and_group, new_expense, show_expenses, get_month_expenses,
+                       get_month_and_year)
 from expenses.models import Expense
 
 
@@ -49,17 +50,27 @@ def total_expenses(update, context, user, group):
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
+@user_and_group
+def month_expenses(update, context, user, group):
+    month, year = get_month_and_year(context.args)
+    text = get_month_expenses(group, year, month)
+    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+
+
 def unknown(update, context):
     text = "Perdón, ese comando no lo entiendo. Si no sabés que hacer, /help."
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
-# Register your handlers here!
+# Register your handlers here
 HANDLERS = [
     CommandHandler('start', start),
     CommandHandler('help', show_help),
     CommandHandler('gasto', load_expense),
     CommandHandler('g', load_expense),
     CommandHandler('total', total_expenses),
+    CommandHandler('mes', month_expenses),
+    CommandHandler('month', month_expenses),
+    CommandHandler('m', month_expenses),
     MessageHandler(Filters.command, unknown),
 ]

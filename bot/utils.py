@@ -66,8 +66,8 @@ def new_expense(params, user, group):
         exchange_rate = data['exchange_rate']
         expense.original_currency = exchange_rate.currency
         expense.original_amount = data['original_amount']
-        response_text += 'Tu gasto se convirtió a {} usando un tipo de cambio = ${} (cargado el ' \
-            '{}).\n\n'.format(
+        response_text += 'Tu gasto se convirtió de {} a $ usando un tipo de cambio = ${} \
+            (cargado el {}).\n\n'.format(
                 CURRENCY[exchange_rate.currency],
                 exchange_rate.rate,
                 exchange_rate.date
@@ -196,14 +196,13 @@ def get_amount_and_currency(raw_amount):
     return amount, exchange_rate, original_amount
 
 
-def show_expenses(group, *params):
+def show_expenses(group, **expense_filters):
     """
-    Return a text with expenses processed and filtered according to params.
+    Return a text with expenses processed and filtered according to the expense filters recived.
     """
-    group_expenses_qs = Expense.objects.filter(group=group)
+    group_expenses_qs = Expense.objects.filter(group=group, **expense_filters)
     if not group_expenses_qs.exists():
         return "Todavía no hay gastos cargados en este grupo"
-    first_expense = group_expenses_qs.last() # first expense is the last one (reverse date order)
     total_expenses = group_expenses_qs.aggregate(Sum('amount'))['amount__sum']
     total_expenses = round(total_expenses, 2)
     user_expenses = {}
@@ -214,9 +213,53 @@ def show_expenses(group, *params):
             user_amount = round(user_amount, 2)
             user_expenses[user.username] = user_amount
 
-    text = "Gastos desde el {} hasta ahora".format(first_expense.date)
-    text += "\n\nTotal: ${}\n".format(total_expenses)
+    text = "Total: ${} ({} gastos)\n".format(total_expenses, group_expenses_qs.count())
     for user, total in user_expenses.items():
         text += "\n\n{}: ${} ({}%)".format(user, total, round(total/total_expenses*100))
 
     return text
+
+
+def get_month_expenses(group, year, month):
+    first_day_of_month = dt.date(year, month, 1)
+    if month == 12:
+        next_month = 1
+        year += 1
+    else:
+        next_month = month + 1
+    first_day_of_next_month = dt.date(year, next_month, 1)
+
+    expense_filters = {
+        'date__gte': first_day_of_month,
+        'date__lt': first_day_of_next_month,
+    }
+    text = "Gastos del mes {} del año {}\n\n".format(month, year)
+    text += show_expenses(group, **expense_filters)
+    return text
+
+
+def get_month_and_year(params):
+    today = dt.date.today()
+    month = today.month
+    year = today.year
+    if not params:
+        return month, year
+    elif len(params) == 1:
+        param_month = params[0]
+        param_year = year
+    else:
+        param_month, param_year = params
+
+    try:
+        param_month = int(param_month)
+        param_year = int(param_year)
+        if param_month <= 12:
+            month = param_month
+        year = param_year
+        if year < 100:
+            year += 2000
+
+    except:
+        pass
+
+    return month, year
