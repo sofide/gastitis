@@ -263,3 +263,8 @@ def get_month_and_year(params):
         pass
 
     return month, year
+
+
+def is_group(update):
+    # if the sender id is the same as the chat id, the message is recived from a private chat
+    return update.message.from_user.id != update.message.chat_id

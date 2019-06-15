@@ -9,6 +9,7 @@ from telegram import ParseMode
 from bot.utils import (
     get_month_expenses,
     get_month_and_year,
+    is_group,
     new_expense,
     show_expenses,
     user_and_group,
