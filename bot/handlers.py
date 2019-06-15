@@ -4,9 +4,15 @@ Telegram bot logic.
 import logging
 
 from telegram.ext import CommandHandler, MessageHandler, Filters
+from telegram import ParseMode
 
-from bot.utils import (user_and_group, new_expense, show_expenses, get_month_expenses,
-                       get_month_and_year)
+from bot.utils import (
+    get_month_expenses,
+    get_month_and_year,
+    new_expense,
+    show_expenses,
+    user_and_group,
+)
 from expenses.models import Expense
 
 
@@ -31,11 +37,13 @@ def start(update, context, user, group):
 
 def show_help(update, context):
     help_text = [
-        'Para registrar un gasto, /gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3})',
-        'Para mostrar el total hasta el momento, /total',
+        'Para registrar un gasto `/gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3})`',
+        'Para mostrar el total hasta el momento `/total`',
+        'Para mostrar el total de un mes `/mes ({mes}) ({año})`',
     ]
-    text = '\n'.join(help_text)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    text = '\n\n'.join(help_text)
+    context.bot.send_message(chat_id=update.message.chat_id, text=text,
+                             parse_mode=ParseMode.MARKDOWN)
 
 
 @user_and_group
