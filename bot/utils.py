@@ -254,10 +254,18 @@ def show_expenses(group, **expense_filters):
     user_expenses = {}
     if group.users.count() > 1:
         for user in group.users.all():
-            user_expense_qs = group_expenses_qs.filter(user=user)
-            user_amount = user_expense_qs.aggregate(Sum('amount'))['amount__sum'] or 0
-            user_amount = round(user_amount, 2)
-            user_expenses[user.username] = user_amount
+            expense_qs = group_expenses_qs.filter(user=user)
+            expenses = expense_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+
+            payments_done = user.payments_done.filter(group=group, **expense_filters)
+            payments_done = payments_done.aggregate(Sum('amount'))['amount__sum'] or 0
+
+            payments_recived = user.payments_recived.filter(group=group, **expense_filters)
+            payments_recived = payments_recived.aggregate(Sum('amount'))['amount__sum'] or 0
+
+            amount = expenses + payments_done - payments_recived
+            amount = round(amount, 2)
+            user_expenses[user.username] = amount
 
     text = "Total: ${} ({} gastos)\n".format(total_expenses, group_expenses_qs.count())
     for user, total in user_expenses.items():
