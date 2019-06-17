@@ -65,3 +65,17 @@ class Division(models.Model):
 
     def __str__(self):
         return '{} - %{}'.format(self.user, self.portion)
+
+
+class Payment(models.Model):
+    """
+    Payment from a user to another user in the same group.
+    """
+    from_user = models.ForeignKey('auth.User', on_delete=models.CASCADE,
+                                  related_name='payments_done')
+    to_user = models.ForeignKey('auth.User', on_delete=models.CASCADE,
+                                related_name='payments_recived')
+    group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(decimal_places=2, max_digits=256)
+    date = models.DateField()
+    created_date = models.DateTimeField(auto_now=True)
