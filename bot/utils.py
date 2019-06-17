@@ -6,7 +6,7 @@ from django.db.models import Sum
 
 from bot.exceptions import ParameterError
 from bot.models import TelegramUser, TelegramGroup
-from expenses.models import Expense, Tag, ExchangeRate, CURRENCY
+from expenses.models import Expense, Tag, ExchangeRate, Payment, CURRENCY
 
 
 def user_and_group(func):
@@ -194,6 +194,52 @@ def get_amount_and_currency(raw_amount):
         amount = original_amount
 
     return amount, exchange_rate, original_amount
+
+
+def new_payment(params, update, user, group):
+    """
+    Save a new Payment instance.
+    params can have two values (amount and user to pay) or three values (amount, user to pay and
+    date to save the payment.
+    """
+    if group.users.count() == 1:
+        text = "Solo se pueden cargar pagos entre usuarios dentro de un grupo. Este chat tiene "\
+               "un único miembro, por lo que no se pueden realizar pagos."
+        return text
+
+    DATE_FORMAT = '%d/%m/%y'
+    if len(params) == 3:
+        date = params.pop(-1)
+    else:
+        date = dt.date.today().strftime(DATE_FORMAT)
+    try:
+        amount, to_user = params
+        amount = int(amount)
+        to_user = User.objects.exclude(pk=user.pk).get(username=to_user, telegram_groups=group)
+        date = dt.datetime.strptime(date, DATE_FORMAT)
+    except ValueError:
+        text =  "El primer argumento debe ser el monto a pagar, y el segundo argumento el "\
+                "username del usuario al que le estás pagando. \n\n"\
+                "Opcionalmente puede contener un tercer argumento con la fecha en la que se "\
+                "desea  computar el gasto, con el formato dd/mm/yy."
+        return text
+    except User.DoesNotExist:
+        text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
+        text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
+        for member in group.users.exclude(pk=user.pk):
+            text += "- {}\n".format(member.username)
+        return text
+
+    payment_details = {
+        'from_user': user,
+        'to_user': to_user,
+        'group': group,
+        'amount': amount,
+        'date': date,
+    }
+    payment = Payment.objects.create(**payment_details)
+
+    return "Se ha registrado su pago a {} por ${} en la fecha {}".format(to_user, amount, date)
 
 
 def show_expenses(group, **expense_filters):

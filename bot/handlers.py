@@ -11,6 +11,7 @@ from bot.utils import (
     get_month_and_year,
     is_group,
     new_expense,
+    new_payment,
     show_expenses,
     user_and_group,
 )
@@ -54,6 +55,12 @@ def load_expense(update, context, user, group):
 
 
 @user_and_group
+def load_payment(update, context, user, group):
+    text = new_payment(context.args, update, user, group)
+    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+
+
+@user_and_group
 def total_expenses(update, context, user, group):
     text = show_expenses(group)
     context.bot.send_message(chat_id=update.message.chat_id, text=text)
@@ -77,6 +84,8 @@ HANDLERS = [
     CommandHandler('help', show_help),
     CommandHandler('gasto', load_expense),
     CommandHandler('g', load_expense),
+    CommandHandler('pago', load_payment),
+    CommandHandler('p', load_payment),
     CommandHandler('total', total_expenses),
     CommandHandler('mes', month_expenses),
     CommandHandler('month', month_expenses),
