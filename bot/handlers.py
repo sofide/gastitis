@@ -64,14 +64,17 @@ def load_payment(update, context, user, group):
 def total_expenses(update, context, user, group):
     text = show_expenses(group)
     context.bot.send_message(
-        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN)
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
 
 
 @user_and_group
 def month_expenses(update, context, user, group):
     month, year = get_month_and_year(context.args)
     text = get_month_expenses(group, year, month)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
 
 
 def unknown(update, context):
