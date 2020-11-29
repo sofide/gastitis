@@ -63,7 +63,8 @@ def load_payment(update, context, user, group):
 @user_and_group
 def total_expenses(update, context, user, group):
     text = show_expenses(group)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN)
 
 
 @user_and_group

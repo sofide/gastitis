@@ -252,6 +252,7 @@ def show_expenses(group, **expense_filters):
     total_expenses = group_expenses_qs.aggregate(Sum('amount'))['amount__sum']
     total_expenses = round(total_expenses, 2)
     user_expenses = {}
+    text = "*Total: ${} ({} gastos)*\n".format(total_expenses, group_expenses_qs.count())
     if group.users.count() > 1:
         for user in group.users.all():
             expense_qs = group_expenses_qs.filter(user=user)
@@ -267,9 +268,22 @@ def show_expenses(group, **expense_filters):
             amount = round(amount, 2)
             user_expenses[user.username] = amount
 
-    text = "Total: ${} ({} gastos)\n".format(total_expenses, group_expenses_qs.count())
-    for user, total in user_expenses.items():
-        text += "\n\n{}: ${} ({}%)".format(user, total, round(total/total_expenses*100))
+        for user, total in user_expenses.items():
+            text += "- {}: ${} ({}%)\n".format(user, total, round(total/total_expenses*100))
+
+        expenses_equal_parts = round(total_expenses / len(user_expenses), 2)
+        text += f"\n\nPara estar a mano cada uno debería haber gastado ${expenses_equal_parts}:\n"
+        for user, total in user_expenses.items():
+            if total < expenses_equal_parts:
+                debt = round(expenses_equal_parts - total, 2)
+                text += f"- {user} debe pagar ${debt}.\n"
+
+            elif total > expenses_equal_parts:
+                credit = round(total - expenses_equal_parts, 2)
+                text += f"- {user} debe recibir ${credit}.\n"
+
+            else:
+                text += f" - {user} no debe ni le deben nada.\n"
 
     return text
 
