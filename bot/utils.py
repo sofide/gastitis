@@ -214,7 +214,7 @@ def new_payment(params, update, user, group):
         date = dt.date.today().strftime(DATE_FORMAT)
     try:
         amount, to_user = params
-        amount = int(amount)
+        amount = float(amount)
         to_user = User.objects.exclude(pk=user.pk).get(username=to_user, telegram_groups=group)
         date = dt.datetime.strptime(date, DATE_FORMAT)
     except ValueError:
