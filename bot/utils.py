@@ -61,6 +61,7 @@ def new_expense(params, user, group):
     description = data['description']
     date = data['dd']
     tags = data['tt']
+    user = data['uu'] or user
     expense = Expense(user=user, group=group, description=description, amount=amount, date=date)
     if data['exchange_rate']:
         exchange_rate = data['exchange_rate']
@@ -77,7 +78,10 @@ def new_expense(params, user, group):
         for tag in tags:
             expense.tags.add(tag)
 
-    response_text += 'Se guardó tu gasto {}'.format(expense)
+    if data['uu'] is None:
+        response_text += 'Se guardó tu gasto {}'.format(expense)
+    else:
+        response_text += 'Se guardó el gasto que hizo {} para {}'.format(expense.user, expense)
     return response_text
 
 
@@ -87,6 +91,7 @@ def decode_expense_params(params, group):
     amount = expense amount.
     dd = date or None
     tt = Tag instance or None
+    uu = User or None
     description = string, expense description
     """
     # define special arguments and help texts for them
@@ -95,6 +100,7 @@ def decode_expense_params(params, group):
         'tt': 'Luego de "tt" colocar el nombre de la/las etiqueta/s para el gasto que estás '\
         'cargando. Podés ingresar más de una etiqueta separando los nombres por comas (sin '\
         'espacio).',
+        'uu': 'A quién le estás cargando el gasto. Si no lo pasás, se te carga a vos.',
     }
 
     data = {}
@@ -147,6 +153,18 @@ def decode_expense_params(params, group):
             tag_instnce, _ = Tag.objects.get_or_create(name=data['tt'], group=group)
             tags_list.append(tag_instnce)
         data['tt'] = tags_list
+
+    # handle user
+    if data['uu']:
+        # Remove the '@' from the username input:
+        if data['uu'][0] == '@':
+            data['uu'] = data['uu'][1:]
+        # Only already registered users:
+        try:
+            data['uu'] = group.users.get(username=data['uu'])
+        except User.DoesNotExist:
+            text = 'Luego del parámetro "uu" necesito que ingreses un nombre de usuario válido.'
+            raise ParameterError(text)
 
     return data
 

@@ -39,7 +39,7 @@ def start(update, context, user, group):
 
 def show_help(update, context):
     help_text = [
-        'Para registrar un gasto `/gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3})`',
+        'Para registrar un gasto `/gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3} uu {usuario})`',
         'Para mostrar el total hasta el momento `/total`',
         'Para mostrar el total de un mes `/mes ({mes}) ({año})`',
     ]
