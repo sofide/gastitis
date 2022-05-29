@@ -9,7 +9,6 @@ from bot.models import TelegramUser, TelegramGroup
 from expenses.models import Expense, Tag, ExchangeRate, Payment, CURRENCY
 from gastitis.settings import DATE_INPUT_FORMATS
 
-
 def user_and_group(func):
     """
     Add user and group to handler params.
@@ -25,8 +24,7 @@ def user_and_group(func):
             'username': username,
             'first_name': first_name,
             'last_name': last_name,
-        })
-
+        })      
         TelegramUser.objects.update_or_create(
             user=user, chat_id=chat_id, defaults={
                 'username': telegram_username
@@ -39,7 +37,6 @@ def user_and_group(func):
             'name': group_name,
         })
         group.users.add(user)
-
 
         func(update, context, user, group)
 

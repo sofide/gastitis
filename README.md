@@ -23,6 +23,7 @@ I strongly recommend to create two bots: one for testing, to be used in your
 [dev environment](#setting-up-a-dev-environment) and another one for production, used in the
 [deployment](#deployment).
 
+https://t.me/botfather
 
 ### Setting up a dev environment
 
