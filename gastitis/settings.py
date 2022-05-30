@@ -9,11 +9,9 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
+# Configure Django App for Heroku.
+import django_on_heroku
 import os
-import django_heroku
-
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -128,6 +126,8 @@ STATIC_URL = '/static/'
 
 SITE_DOMAIN = 'http://127.0.0.1:8000'
 
+django_on_heroku.settings(locals())
+
 # Heroku settings
 if os.environ.get('HEROKU', False):
     BOT_TOKEN = os.environ.get('BOT_TOKEN')
@@ -136,6 +136,3 @@ if os.environ.get('HEROKU', False):
 else:
     from bot.secret_token import TESTING_BOT_TOKEN
     BOT_TOKEN = TESTING_BOT_TOKEN
-
-
-django_heroku.settings(locals())

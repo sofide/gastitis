@@ -1,5 +1,5 @@
 from django.db import models
-
+import uuid
 from bot.models import TelegramGroup
 
 
@@ -14,6 +14,7 @@ class Tag(models.Model):
     """
     Expenses tag, to keep track of grouped expenses, and compare them in different periods.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False ) 
     name = models.CharField(max_length=256)
     group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='tags')
 
@@ -28,6 +29,7 @@ class ExchangeRate(models.Model):
     """
     Exchange rates for currencies different from default.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False ) 
     currency = models.CharField(max_length=1, choices=CURRENCY.items())
     rate = models.DecimalField(decimal_places=4, max_digits=10)
     date = models.DateField()
@@ -37,6 +39,7 @@ class ExchangeRate(models.Model):
 
 
 class Expense(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False ) 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='expenses')
     group = models.ForeignKey(TelegramGroup, on_delete=models.CASCADE, related_name='expenses')
     description = models.TextField()
@@ -60,6 +63,7 @@ class Division(models.Model):
     """
     How much should everyone pay to afford the total expenses.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False ) 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     portion = models.FloatField()
 
@@ -71,6 +75,7 @@ class Payment(models.Model):
     """
     Payment from a user to another user in the same group.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False ) 
     from_user = models.ForeignKey('auth.User', on_delete=models.CASCADE,
                                   related_name='payments_done')
     to_user = models.ForeignKey('auth.User', on_delete=models.CASCADE,
