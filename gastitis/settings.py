@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
+# Configure Django App for Heroku.
+import django_on_heroku
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -124,6 +125,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 SITE_DOMAIN = 'http://127.0.0.1:8000'
+
+django_on_heroku.settings(locals())
 
 # Heroku settings
 if os.environ.get('HEROKU', False):
