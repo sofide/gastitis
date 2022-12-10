@@ -123,3 +123,6 @@ dmypy.json
 .pyre/
 
 secret_token.py
+
+# mac stuff
+.DS_Store
