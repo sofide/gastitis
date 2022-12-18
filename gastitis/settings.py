@@ -141,15 +141,6 @@ STATIC_URL = '/static/'
 
 SITE_DOMAIN = 'http://127.0.0.1:8000'
 
-# Heroku settings
-if os.environ.get('HEROKU', False):
-    BOT_TOKEN = os.environ.get('BOT_TOKEN')
-    DEBUG = False
-    SITE_DOMAIN = 'https://gastitis.herokuapp.com'
-else:
-    from bot.secret_token import TESTING_BOT_TOKEN
-    BOT_TOKEN = TESTING_BOT_TOKEN
-
 # Telegram Settings
 BOT_TOKEN = TELEGRAM_BOT_TOKEN
 
