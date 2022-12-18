@@ -28,11 +28,22 @@ I strongly recommend to create two bots: one for testing, to be used in your
 
 First, you need to [create a testing Telegram Bot](#creating-a-telegram-bot).
 
-Once you have your testing bot, you need to create a file in `bot/secret_token.py` with the
-following content (replacing {BOT_TOKEN} with the token of your testing bot)
+Once you have your testing bot, you need to create a file in `gastitis/secret_settings.py` with the
+following content with the token of your testing bot)
 
-```
-TESTING_BOT_TOKEN = '{BOT_TOKEN}'
+```python
+TELEGRAM_BOT_TOKEN = '' # place here your bot token
+
+DJANGO_SECRET_KEY = '' # place here a django secret_key (https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key)
+
+DATABASE_SETTINGS = {  # Set None to use sqlite
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': '',  # database name
+    'USER': '',  # database user
+    'PASSWORD': '', # database password
+    'HOST': '127.0.0.1',
+    'PORT': '5432',
+}
 ```
 
 Next, you have to create a new virtual environment, install the requirements, run the migrations
