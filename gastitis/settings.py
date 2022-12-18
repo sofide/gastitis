@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+try:
+    from gastitis.secret_settings import (
+        TELEGRAM_BOT_TOKEN,
+        DJANGO_SECRET_KEY,
+        DATABASE_SETTINGS,
+    )
+
+except ModuleNotFoundError as e:
+    raise Exception("Missing secret_settings module") from e
+
+except ImportError as e:
+    raise Exception("some of the secret settings are missing") from e
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -21,7 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'tiai!rh!f@pw!9)20$jd0%m%q7uhir%3qh8%&9&on2!^v5$@jd'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -77,12 +89,15 @@ WSGI_APPLICATION = 'gastitis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if DATABASE_SETTINGS:
+    DATABASES = {'default': DATABASE_SETTINGS}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
 DATE_INPUT_FORMATS = ['%d-%m-%Y', '%Y-%m-%d', '%d/%m/%Y', '%Y/%m/%d']
 
 
@@ -134,3 +149,8 @@ if os.environ.get('HEROKU', False):
 else:
     from bot.secret_token import TESTING_BOT_TOKEN
     BOT_TOKEN = TESTING_BOT_TOKEN
+
+# Telegram Settings
+BOT_TOKEN = TELEGRAM_BOT_TOKEN
+
+print(f"Connecting to database {DATABASES['default']['NAME']}" )
