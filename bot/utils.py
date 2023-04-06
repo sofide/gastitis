@@ -21,7 +21,7 @@ def user_and_group(func):
         last_name = getattr(user_data, 'last_name') or '-'
         telegram_username = getattr(user_data, 'username', '')
         username = telegram_username or first_name
-        user, _ = User.objects.get_or_create(telegram__chat_id=user_data.id, defaults={
+        user, _ = User.objects.get_or_create(telegram__chat_id=chat_id, defaults={
             'username': username,
             'first_name': first_name,
             'last_name': last_name,
