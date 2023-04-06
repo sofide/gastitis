@@ -68,3 +68,11 @@ sudo docker exec -it postgres-sofi \
     psql -U postgres -d gastitis -s public \
     -c "SELECT * FROM expenses_expense ORDER BY id DESC LIMIT 100"
 ```
+
+## Create a user
+```bash
+sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "CREATE ROLE your_user WITH LOGIN PASSWORD 'your_password'"
+sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON DATABASE gastitis TO your_user"
+sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO your_user"
+sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO your_user"
+```
