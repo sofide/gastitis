@@ -76,3 +76,8 @@ sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GR
 sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO your_user"
 sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO your_user"
 ```
+
+## Change the ownership of a table
+```bash
+sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "ALTER TABLE bot_telegramgroup OWNER TO prod_gastitis"
+```
