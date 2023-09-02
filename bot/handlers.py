@@ -16,6 +16,7 @@ from bot.utils import (
     user_and_group,
 )
 from expenses.models import Expense
+from extra_features.asado import how_much_asado_message
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -76,6 +77,15 @@ def month_expenses(update, context, user, group):
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
     )
 
+def calc_asado(update, context):
+    try:
+        people = int(context.args[0])
+        text = how_much_asado_message(people)
+    except:
+        text = "Hubo un problema. Recordá pasar la cantidad de personas como parámetro."
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+
 
 def unknown(update, context):
     text = "Perdón, ese comando no lo entiendo. Si no sabés que hacer, /help."
@@ -94,5 +104,7 @@ HANDLERS = [
     CommandHandler('mes', month_expenses),
     CommandHandler('month', month_expenses),
     CommandHandler('m', month_expenses),
+    CommandHandler('asado', calc_asado),
+    CommandHandler('a', calc_asado),
     MessageHandler(Filters.command, unknown),
 ]
