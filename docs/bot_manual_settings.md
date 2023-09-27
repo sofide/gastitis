@@ -12,6 +12,8 @@ p - Cargar un pago
 mes - Ver los gastos de un mes
 m - Ver los gastos de un mes
 total - Ver total de gastos
+asado - Calcular cuanto asado comprar
+a - Calcular cuanto asado comprar
 help - Mostrar ayuda
 ```
 
