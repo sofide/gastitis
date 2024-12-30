@@ -1,12 +1,12 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 # Gastitis
 
-Telegram bot as a tool to keep track of your expenses.
+Gastitis is a Telegram bot to keep track of your expenses.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for
-development and testing purposes. See deployment for notes on how to deploy the project on a live
-system.
+These instructions will get you a copy of the project up and running on your local machine.
 
 ### How to use
 
@@ -36,7 +36,9 @@ TELEGRAM_BOT_TOKEN = '' # place here your bot token
 
 DJANGO_SECRET_KEY = '' # place here a django secret_key (https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key)
 
-DATABASE_SETTINGS = {  # Set None to use sqlite
+DATABASE_SETTINGS = None  # Set this setting in 'None' if you want to run gastitis with sqlite
+
+DATABASE_SETTINGS = {  # Use this configs if you want to setup a specific database
     'ENGINE': 'django.db.backends.postgresql',
     'NAME': '',  # database name
     'USER': '',  # database user
@@ -45,6 +47,8 @@ DATABASE_SETTINGS = {  # Set None to use sqlite
     'PORT': '5432',
 }
 ```
+
+Note: If you want to setup a specific database like postgresql, check out the section [DATABASE_SETUP](DATABASE_SETUP.md).
 
 Next, you have to create a new virtual environment, install the requirements, run the migrations
 and start the dev bot:
@@ -70,19 +74,10 @@ From your browser, go to http://localhost:8000/admin enter your username and pas
 the previous step) and now you can explore the data that your bot has generated!
 
 
-## Deployment
-
-You can easily deploy this project on Heroku:
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-You will need to set the environment variable `BOT_TOKEN` to a valid Telegram Bot authorization
-token. This implies [creating your own Telegram bot](#creating-a-telegram-bot).
-
 ## Authors
 
 * Sofía Denner
 
 ## License
 
-TBD
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
