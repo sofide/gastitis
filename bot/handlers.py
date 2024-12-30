@@ -51,19 +51,19 @@ async def show_help(update, context):
 
 @user_and_group
 async def load_expense(update, context, user, group):
-    text = new_expense(context.args, user, group)
+    text = await new_expense(context.args, user, group)
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
 @user_and_group
 async def load_payment(update, context, user, group):
-    text = new_payment(context.args, update, user, group)
+    text = await new_payment(context.args, update, user, group)
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
 @user_and_group
 async def total_expenses(update, context, user, group):
-    text = show_expenses(group)
+    text = await show_expenses(group)
     await context.bot.send_message(
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
     )
@@ -72,7 +72,7 @@ async def total_expenses(update, context, user, group):
 @user_and_group
 async def month_expenses(update, context, user, group):
     month, year = get_month_and_year(context.args)
-    text = get_month_expenses(group, year, month)
+    text = await get_month_expenses(group, year, month)
     await context.bot.send_message(
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
     )
@@ -92,7 +92,6 @@ async def unknown(update, context):
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
-# Register your handlers here
 HANDLERS = [
     CommandHandler('start', start),
     CommandHandler('help', show_help),
