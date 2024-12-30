@@ -234,7 +234,7 @@ async def new_payment(params, update, user, group):
     params can have two values (amount and user to pay) or three values (amount, user to pay and
     date to save the payment.
     """
-    if group.users.count() == 1:
+    if await group.users.acount() == 1:
         text = "Solo se pueden cargar pagos entre usuarios dentro de un grupo. Este chat tiene "\
                "un único miembro, por lo que no se pueden realizar pagos."
         return text
@@ -258,7 +258,7 @@ async def new_payment(params, update, user, group):
     except User.DoesNotExist:
         text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
         text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
-        for member in group.users.exclude(pk=user.pk):
+        async for member in group.users.exclude(pk=user.pk):
             text += "- {}\n".format(member.username)
         return text
 
