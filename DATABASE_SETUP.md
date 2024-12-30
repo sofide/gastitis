@@ -14,7 +14,7 @@ docker images
 
 - To run a container with a fixed volume in `postgres-datadir`
 ```
-sudo docker run -d \
+docker run -d \
     --name postgres-sofi \
     -e POSTGRES_PASSWORD=<secret-password> \
     -v </path/until/local/directory/volume>:/var/lib/postgresql/data \
@@ -26,13 +26,24 @@ sudo docker run -d \
 - To access a shell inside postgres container, we can use psql:
 
 ```bash
-sudo docker exec -it postgres-sofi  psql -U postgres --help
+docker exec -it postgres-sofi  psql -U postgres --help
 ```
 
 The `-U postgres` param can be omited in the command `--help`, but it's needed in all
 the other commands to manipulate the database.
 
-We can use pysql to create a `gastits` table.
+You can use psql to create a new `gastits` database or restore a backup.
+
+## Check out existing databases
+```bash
+docker exec -it postgres-sofi psql -U postgres -c "SELECT datname FROM pg_database"
+```
+
+## Create a new database
+
+```bash
+docker exec -it postgres-sofi psql -U postgres -c "CREATE DATABASE prueba"
+```
 
 ## Restore a backup
 
@@ -42,12 +53,12 @@ To restore a backup:
 with the following command:
 
 ```bash
-sudo docker inspect -f '{{ json .Mounts }}' postgres-sofi
+docker inspect -f '{{ json .Mounts }}' postgres-sofi
 ```
 
 - first, copy the dump in our `/backups` folder (thanks to the volume created in `run`)
 ```bash
-sudo docker cp <backup_path> postgres-sofi:backups
+docker cp <backup_path> postgres-sofi:backups
 ```
 
 - then, restore it with `pg_restore`:
@@ -60,24 +71,28 @@ docker exec -it postgres-sofi pg_restore \
     backups/<backup_name>
 ```
 
-## Make a Query
+### Make a Query
 
 To check everything is loaded as expected, we can run a query with pysql:
 ```bash
-sudo docker exec -it postgres-sofi \
+docker exec -it postgres-sofi \
     psql -U postgres -d gastitis -s public \
     -c "SELECT * FROM expenses_expense ORDER BY id DESC LIMIT 100"
 ```
 
+## Check out existing users (or roles)
+```bash
+docker exec -it postgres-sofi psql -U postgres -c "SELECT rolname FROM pg_roles"
+```
+
 ## Create a user
 ```bash
-sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "CREATE ROLE your_user WITH LOGIN PASSWORD 'your_password'"
-sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON DATABASE gastitis TO your_user"
-sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO your_user"
-sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO your_user"
+docker exec -it postgres-sofi psql -U postgres -d gastitis -c "CREATE ROLE your_user WITH LOGIN PASSWORD 'your_password'"
+docker exec -it postgres-sofi psql -U postgres -d gastitis -c "GRANT ALL ON DATABASE gastitis TO your_user"
+docker exec -it postgres-sofi psql -U postgres -d gastitis -c "GRANT ALL ON ALL SCHEMA public TO your_user"
 ```
 
 ## Change the ownership of a table
 ```bash
-sudo docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "ALTER TABLE bot_telegramgroup OWNER TO prod_gastitis"
+docker exec -it postgres-sofi psql -U postgres -d gastitis -s public -c "ALTER TABLE bot_telegramgroup OWNER TO your_user"
 ```
