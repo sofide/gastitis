@@ -3,8 +3,8 @@ Telegram bot logic.
 """
 import logging
 
-from telegram.ext import CommandHandler, MessageHandler, Filters
-from telegram import ParseMode
+from telegram.ext import CommandHandler, MessageHandler, filters
+from telegram.constants import ParseMode
 
 from bot.utils import (
     get_month_expenses,
@@ -106,5 +106,5 @@ HANDLERS = [
     CommandHandler('m', month_expenses),
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
-    MessageHandler(Filters.command, unknown),
+    MessageHandler(filters.COMMAND, unknown),
 ]
