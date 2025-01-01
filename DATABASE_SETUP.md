@@ -32,7 +32,7 @@ docker exec -it postgres-sofi  psql -U postgres --help
 The `-U postgres` param can be omited in the command `--help`, but it's needed in all
 the other commands to manipulate the database.
 
-You can use psql to create a new `gastits` database or restore a backup.
+You can use psql to create a new `gastitis` database or restore a backup.
 
 ## Check out existing databases
 ```bash
@@ -42,7 +42,7 @@ docker exec -it postgres-sofi psql -U postgres -c "SELECT datname FROM pg_databa
 ## Create a new database
 
 ```bash
-docker exec -it postgres-sofi psql -U postgres -c "CREATE DATABASE prueba"
+docker exec -it postgres-sofi psql -U postgres -c "CREATE DATABASE gastitis"
 ```
 
 ## Restore a backup
