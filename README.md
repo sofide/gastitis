@@ -48,7 +48,7 @@ DATABASE_SETTINGS = {  # Use this configs if you want to setup a specific databa
 }
 ```
 
-Note: If you want to setup a specific database like postgreSQL, check out the section [DATABASE_SETUP](DATABASE_SETUP.md).
+Note: If you want to setup a specific database like postgreSQL, check out the section [DATABASE_SETUP](docs/database_setup.md).
 
 Next, you have to create a new virtual environment, install the requirements, run the migrations
 and start the dev bot:
