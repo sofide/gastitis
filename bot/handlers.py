@@ -3,8 +3,8 @@ Telegram bot logic.
 """
 import logging
 
-from telegram.ext import CommandHandler, MessageHandler, Filters
-from telegram import ParseMode
+from telegram.ext import CommandHandler, MessageHandler, filters
+from telegram.constants import ParseMode
 
 from bot.utils import (
     get_month_expenses,
@@ -24,7 +24,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 @user_and_group
-def start(update, context, user, group):
+async def start(update, context, user, group):
     logging.info('[ /start ]: %s', update)
     text = "Hola {}!\n\n".format(user)
     text += "Este es un proyecto de juguete. Es para uso personal, y todavía se encuentra " \
@@ -35,64 +35,63 @@ def start(update, context, user, group):
             "development. There aren't any warranties of security or privacy. Use it under " \
             "your own risk.\n\n"
     text += "If you don't know how to use this bot, just ask for /help\n\n"
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
-def show_help(update, context):
+async def show_help(update, context):
     help_text = [
         'Para registrar un gasto `/gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3} uu {usuario})`',
         'Para mostrar el total hasta el momento `/total`',
         'Para mostrar el total de un mes `/mes ({mes}) ({año})`',
     ]
     text = '\n\n'.join(help_text)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text,
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text,
                              parse_mode=ParseMode.MARKDOWN)
 
 
 @user_and_group
-def load_expense(update, context, user, group):
-    text = new_expense(context.args, user, group)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+async def load_expense(update, context, user, group):
+    text = await new_expense(context.args, user, group)
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
 @user_and_group
-def load_payment(update, context, user, group):
-    text = new_payment(context.args, update, user, group)
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+async def load_payment(update, context, user, group):
+    text = await new_payment(context.args, update, user, group)
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
 @user_and_group
-def total_expenses(update, context, user, group):
-    text = show_expenses(group)
-    context.bot.send_message(
+async def total_expenses(update, context, user, group):
+    text = await show_expenses(group)
+    await context.bot.send_message(
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
     )
 
 
 @user_and_group
-def month_expenses(update, context, user, group):
+async def month_expenses(update, context, user, group):
     month, year = get_month_and_year(context.args)
-    text = get_month_expenses(group, year, month)
-    context.bot.send_message(
+    text = await get_month_expenses(group, year, month)
+    await context.bot.send_message(
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
     )
 
-def calc_asado(update, context):
+async def calc_asado(update, context):
     try:
         people = int(context.args[0])
         text = how_much_asado_message(people)
     except:
         text = "Hubo un problema. Recordá pasar la cantidad de personas como parámetro."
 
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
-def unknown(update, context):
+async def unknown(update, context):
     text = "Perdón, ese comando no lo entiendo. Si no sabés que hacer, /help."
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
-# Register your handlers here
 HANDLERS = [
     CommandHandler('start', start),
     CommandHandler('help', show_help),
@@ -106,5 +105,5 @@ HANDLERS = [
     CommandHandler('m', month_expenses),
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
-    MessageHandler(Filters.command, unknown),
+    MessageHandler(filters.COMMAND, unknown),
 ]

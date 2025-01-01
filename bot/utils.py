@@ -14,20 +14,20 @@ def user_and_group(func):
     """
     Add user and group to handler params.
     """
-    def wrapper(update, context):
+    async def wrapper(update, context):
         user_data = update.message.from_user
         chat_id = user_data.id
         first_name = getattr(user_data, 'first_name', chat_id)
         last_name = getattr(user_data, 'last_name') or '-'
         telegram_username = getattr(user_data, 'username', '')
         username = telegram_username or first_name
-        user, _ = User.objects.get_or_create(telegram__chat_id=chat_id, defaults={
+        user, _ = await User.objects.aget_or_create(telegram__chat_id=chat_id, defaults={
             'username': username,
             'first_name': first_name,
             'last_name': last_name,
         })
 
-        TelegramUser.objects.update_or_create(
+        await TelegramUser.objects.aupdate_or_create(
             user=user, chat_id=chat_id, defaults={
                 'username': telegram_username
             })
@@ -35,25 +35,25 @@ def user_and_group(func):
         group_id = group_data.id
         group_name = group_data.title or username + '__private'
 
-        group, _ = TelegramGroup.objects.get_or_create(chat_id=group_id, defaults={
+        group, _ = await TelegramGroup.objects.aget_or_create(chat_id=group_id, defaults={
             'name': group_name,
         })
-        group.users.add(user)
+        await group.users.aadd(user)
 
 
-        func(update, context, user, group)
+        await func(update, context, user, group)
 
     return wrapper
 
 
-def new_expense(params, user, group):
+async def new_expense(params, user, group):
     """
     Check if params are valid and create a new expense.
 
     Returns a text to send to the user.
     """
     try:
-        data = decode_expense_params(params, group)
+        data = await decode_expense_params(params, group)
     except ParameterError as e:
         return str(e)
 
@@ -74,10 +74,10 @@ def new_expense(params, user, group):
                 exchange_rate.rate,
                 exchange_rate.date
             )
-    expense.save()
+    await expense.asave()
     if tags:
         for tag in tags:
-            expense.tags.add(tag)
+            await expense.tags.aadd(tag)
 
     if data['uu'] is None:
         response_text += 'Se guardó tu gasto {}'.format(expense)
@@ -95,7 +95,7 @@ def parse_date(date_str, date_formats):
     raise DateFormatterError(f"Formato de fecha no válido: {date_str}")
 
 
-def decode_expense_params(params, group):
+async def decode_expense_params(params, group):
     """
     Process command params in expense's attributes, and return a dict with the following data:
     amount = expense amount.
@@ -122,7 +122,7 @@ def decode_expense_params(params, group):
     # handle amount
     amount_received, *params = params
 
-    amount, exchange_rate, original_amount = get_amount_and_currency(amount_received)
+    amount, exchange_rate, original_amount = await get_amount_and_currency(amount_received)
     data['amount'] = amount
     data['exchange_rate'] = exchange_rate
     data['original_amount'] = original_amount
@@ -164,7 +164,7 @@ def decode_expense_params(params, group):
     if data['tt']:
         tags_list = []
         for t in data['tt'].split(','):
-            tag_instnce, _ = Tag.objects.get_or_create(name=data['tt'], group=group)
+            tag_instnce, _ = await Tag.objects.aget_or_create(name=data['tt'], group=group)
             tags_list.append(tag_instnce)
         data['tt'] = tags_list
 
@@ -175,7 +175,7 @@ def decode_expense_params(params, group):
             data['uu'] = data['uu'][1:]
         # Only already registered users:
         try:
-            data['uu'] = group.users.get(username=data['uu'])
+            data['uu'] = await group.users.aget(username=data['uu'])
         except User.DoesNotExist:
             text = 'Luego del parámetro "uu" necesito que ingreses un nombre de usuario válido.'
             raise ParameterError(text)
@@ -183,7 +183,7 @@ def decode_expense_params(params, group):
     return data
 
 
-def get_amount_and_currency(raw_amount):
+async def get_amount_and_currency(raw_amount):
     """
     Given a string it returns an amount (in the default currency), the original amount  and a
     ExchangeRate instance.  If the string doesn't have a currency specified, it assumes the
@@ -200,7 +200,7 @@ def get_amount_and_currency(raw_amount):
     for key, value in CURRENCY.items():
         if raw_amount.startswith((key, value)) or raw_amount.endswith((key, value)):
             # TODO: get current exchanger rate from api.
-            exchange_rate = ExchangeRate.objects.filter(currency=key).last()
+            exchange_rate = await ExchangeRate.objects.filter(currency=key).alast()
             break
     else:
         key, value = ['', '']
@@ -228,13 +228,13 @@ def get_amount_and_currency(raw_amount):
     return amount, exchange_rate, original_amount
 
 
-def new_payment(params, update, user, group):
+async def new_payment(params, update, user, group):
     """
     Save a new Payment instance.
     params can have two values (amount and user to pay) or three values (amount, user to pay and
     date to save the payment.
     """
-    if group.users.count() == 1:
+    if await group.users.acount() == 1:
         text = "Solo se pueden cargar pagos entre usuarios dentro de un grupo. Este chat tiene "\
                "un único miembro, por lo que no se pueden realizar pagos."
         return text
@@ -247,7 +247,7 @@ def new_payment(params, update, user, group):
     try:
         amount, to_user = params
         amount = float(amount)
-        to_user = User.objects.exclude(pk=user.pk).get(username=to_user, telegram_groups=group)
+        to_user = await User.objects.exclude(pk=user.pk).aget(username=to_user, telegram_groups=group)
         date = dt.datetime.strptime(date, DATE_FORMAT)
     except ValueError:
         text =  "El primer argumento debe ser el monto a pagar, y el segundo argumento el "\
@@ -258,7 +258,7 @@ def new_payment(params, update, user, group):
     except User.DoesNotExist:
         text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
         text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
-        for member in group.users.exclude(pk=user.pk):
+        async for member in group.users.exclude(pk=user.pk):
             text += "- {}\n".format(member.username)
         return text
 
@@ -269,32 +269,37 @@ def new_payment(params, update, user, group):
         'amount': amount,
         'date': date,
     }
-    payment = Payment.objects.create(**payment_details)
+    payment = await Payment.objects.acreate(**payment_details)
 
     return "Se ha registrado su pago a {} por ${} en la fecha {}".format(to_user, amount, date)
 
 
-def show_expenses(group, **expense_filters):
+async def show_expenses(group, **expense_filters):
     """
     Return a text with expenses processed and filtered according to the expense filters recived.
     """
     group_expenses_qs = Expense.objects.filter(group=group, **expense_filters)
-    if not group_expenses_qs.exists():
+    if not await group_expenses_qs.aexists():
         return "Todavía no hay gastos cargados en este grupo"
-    total_expenses = group_expenses_qs.aggregate(Sum('amount'))['amount__sum']
+    total_expenses = await group_expenses_qs.aaggregate(Sum('amount'))
+    total_expenses = total_expenses['amount__sum']
     total_expenses = round(total_expenses, 2)
     user_expenses = {}
-    text = "*Total: ${} ({} gastos)*\n".format(total_expenses, group_expenses_qs.count())
-    if group.users.count() > 1:
-        for user in group.users.all():
+    quantity_expenses = await group_expenses_qs.acount()
+    text = "*Total: ${} ({} gastos)*\n".format(total_expenses, quantity_expenses)
+    if await group.users.acount() > 1:
+        async for user in group.users.all():
             expense_qs = group_expenses_qs.filter(user=user)
-            expenses = expense_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+            expenses = await expense_qs.aaggregate(Sum('amount'))
+            expenses = expenses['amount__sum'] or 0
 
             payments_done = user.payments_done.filter(group=group, **expense_filters)
-            payments_done = payments_done.aggregate(Sum('amount'))['amount__sum'] or 0
+            payments_done = await payments_done.aaggregate(Sum('amount'))
+            payments_done = payments_done['amount__sum'] or 0
 
             payments_recived = user.payments_recived.filter(group=group, **expense_filters)
-            payments_recived = payments_recived.aggregate(Sum('amount'))['amount__sum'] or 0
+            payments_recived = await payments_recived.aaggregate(Sum('amount'))
+            payments_recived = payments_recived['amount__sum'] or 0
 
             amount = expenses + payments_done - payments_recived
             amount = round(amount, 2)
@@ -320,7 +325,7 @@ def show_expenses(group, **expense_filters):
     return text
 
 
-def get_month_expenses(group, year, month):
+async def get_month_expenses(group, year, month):
     first_day_of_month = dt.date(year, month, 1)
     if month == 12:
         next_month = 1
@@ -334,7 +339,7 @@ def get_month_expenses(group, year, month):
         'date__lt': first_day_of_next_month,
     }
     text = "Gastos del mes {} del año {}\n\n".format(month, year)
-    text += show_expenses(group, **expense_filters)
+    text += await show_expenses(group, **expense_filters)
     return text
 
 
