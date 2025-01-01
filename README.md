@@ -73,6 +73,17 @@ python manage.py runserver
 From your browser, go to http://localhost:8000/admin enter your username and password (created in
 the previous step) and now you can explore the data that your bot has generated!
 
+### Extra Optional Steps: Configure Your Telegram Bot
+
+Enhance your Telegram bot's functionality by customizing its settings. Follow the instructions 
+in the [Bot Manual Settings](docs/bot_manual_settings.md) for detailed guidance.
+
+
+## Contributing
+
+- After making any changes to the code, please run the [functional tests](docs/functional_testing.md) to ensure everything is working as expected.
+- If you are adding a new command, follow the instructions in the [Create a New Command](docs/create_new_command.md) section.
+
 
 ## Authors
 
