@@ -247,6 +247,8 @@ async def new_payment(params, update, user, group):
     try:
         amount, to_user = params
         amount = float(amount)
+        if to_user.startswith("@"):
+            to_user = to_user[1:]
         to_user = await User.objects.exclude(pk=user.pk).aget(username=to_user, telegram_groups=group)
         date = dt.datetime.strptime(date, DATE_FORMAT)
     except ValueError:
