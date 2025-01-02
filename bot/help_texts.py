@@ -14,6 +14,7 @@ HELP_GASTO = f"""
     - dd <fecha> en formato año/mes/día. Ej: `dd 2024/10/01`.
     - tt tag1,tag2,tag3. Ej: `tt comida` o `tt comida,salida`.
     - uu <usuario> que realizó el gasto. Ej: `uu juan`. (por default se carga el gasto a nombre de quien envía el mensaje).
+    _Nota:_ El usuario tiene que haber enviado previamente algún comando en el grupo para que gastitis lo registre.
 
 Ejemplo con todos los params opcionales:
     `/gasto 10 pan  dd 2024/01/30 tt comida uu juan`
@@ -37,6 +38,8 @@ HELP_PAGO = f"""
 *Registrar un pago a un usuario del grupo:* `/pago <username>`
 
 _Esta funcionalidad solo está disponible en grupos con más de un usuario._
+
+_Nota:_ El usuario tiene que haber enviado previamente algún comando en el grupo para que gastitis lo registre.
 
 {SHORTCUT} `/p`
 
