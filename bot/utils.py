@@ -177,7 +177,9 @@ async def decode_expense_params(params, group):
         try:
             data['uu'] = await group.users.aget(username=data['uu'])
         except User.DoesNotExist:
-            text = 'Luego del parámetro "uu" necesito que ingreses un nombre de usuario válido.'
+            text = 'Luego del parámetro "uu" necesito que ingreses un nombre de usuario válido.\n\n'
+            text += 'El usuario debe previamente haber enviado algún comando en el grupo para que gastitis lo registre. '
+            text += 'Ej: /total'
             raise ParameterError(text)
 
     return data
