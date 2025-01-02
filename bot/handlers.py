@@ -6,6 +6,7 @@ import logging
 from telegram.ext import CommandHandler, MessageHandler, filters
 from telegram.constants import ParseMode
 
+from bot.help_texts import HELP_TEXT
 from bot.utils import (
     get_month_expenses,
     get_month_and_year,
@@ -39,14 +40,11 @@ async def start(update, context, user, group):
 
 
 async def show_help(update, context):
-    help_text = [
-        'Para registrar un gasto `/gasto {monto} {descripcion} (dd {fecha} tt {tag1,tag2,tag3} uu {usuario})`',
-        'Para mostrar el total hasta el momento `/total`',
-        'Para mostrar el total de un mes `/mes ({mes}) ({año})`',
-    ]
-    text = '\n\n'.join(help_text)
-    await context.bot.send_message(chat_id=update.message.chat_id, text=text,
-                             parse_mode=ParseMode.MARKDOWN)
+    await context.bot.send_message(
+        chat_id=update.message.chat_id,
+        text=HELP_TEXT,
+        parse_mode=ParseMode.MARKDOWN
+    )
 
 
 @user_and_group
