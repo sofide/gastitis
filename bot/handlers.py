@@ -18,6 +18,7 @@ from bot.utils import (
 )
 from expenses.models import Expense
 from extra_features.asado import how_much_asado_message
+from use_cases.export import ExportExpenses
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -85,6 +86,16 @@ async def calc_asado(update, context):
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
 
+@user_and_group
+async def export(update, context, user, group):
+    exporter = ExportExpenses(group)
+
+    text = await exporter.run()
+    await context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
+
+
 async def unknown(update, context):
     text = "Perdón, ese comando no lo entiendo. Si no sabés que hacer, /help."
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
@@ -103,5 +114,6 @@ HANDLERS = [
     CommandHandler('m', month_expenses),
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
+    CommandHandler('export', export),
     MessageHandler(filters.COMMAND, unknown),
 ]
