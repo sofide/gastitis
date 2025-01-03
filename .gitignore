@@ -123,6 +123,7 @@ dmypy.json
 .pyre/
 
 gastitis/secret_settings.py
+gastitis/google_credentials.json
 
 # mac stuff
 .DS_Store

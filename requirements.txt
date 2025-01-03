@@ -1,3 +1,4 @@
 Django==5.1.4
+gspread==6.1.4
 psycopg2-binary==2.9.10
 python-telegram-bot==21.9
