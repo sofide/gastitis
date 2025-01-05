@@ -77,3 +77,5 @@ class GoogleSheet:
         worksheet, worksheet_name = await self.create_new_worksheet(worksheet_name)
 
         await google_client.save_data_in_worksheet(worksheet, data)
+
+        return worksheet_name

@@ -88,7 +88,7 @@ async def calc_asado(update, context):
 
 @user_and_group
 async def export(update, context, user, group):
-    exporter = ExportExpenses(group)
+    exporter = ExportExpenses(user, group)
 
     text = await exporter.run()
     await context.bot.send_message(
@@ -114,6 +114,6 @@ HANDLERS = [
     CommandHandler('m', month_expenses),
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
-    CommandHandler('export', export),
+    CommandHandler('exportar', export),
     MessageHandler(filters.COMMAND, unknown),
 ]

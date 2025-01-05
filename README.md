@@ -39,6 +39,8 @@ DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., Postg
     'HOST': '127.0.0.1',
     'PORT': '5432',
 }
+
+BETA_USERS = ['your_telegram_username']  # List of Telegram usernames allowed to access beta features and commands
 ```
 
 >  Note: For setting up a specific database like PostgreSQL, refer to the [Database Setup Guide](docs/database_setup.md).

@@ -1,15 +1,24 @@
+from django.conf import settings
 from django.db import connection
 from django.db.models import Func, F, ExpressionWrapper, FloatField
 from django.db.models.expressions import RawSQL
 
 from expenses.models import Expense
-from gastitis.exceptions import NoExpensesInChat
+from gastitis.exceptions import NoExpensesInChat, UserNotAuthorized
 from services.google_sheets import GoogleSheet
+
+def only_beta_users(username):
+    """
+    Only allow beta users to perform this action.
+    """
+    if username not in settings.BETA_USERS:
+        raise UserNotAuthorized()
 
 
 class ExportExpenses:
 
-    def __init__(self, group, **expense_filters):
+    def __init__(self, user, group, **expense_filters):
+        self.user = user
         self.group = group
         self.expense_filters = expense_filters
 
@@ -71,21 +80,38 @@ class ExportExpenses:
         return table
 
     async def export_to_google_sheet(self, table):
-        url = "https://docs.google.com/spreadsheets/d/1YimK1TlwjzfbCPZIxrTVsNJAhbhe4RnFmvibdkJLvzg/edit?gid=1350094138#gid=1350094138"
+        url, name = self.get_sheet_url_and_name()
+
         sheet = GoogleSheet(url)
-        await sheet.save_data("name", table)
+        worksheet_name = await sheet.save_data(name, table)
+
+        return url, worksheet_name
+
+    def get_sheet_url_and_name(self):
+        # TODO: save urls in db by group
+        url = "https://docs.google.com/spreadsheets/d/1YimK1TlwjzfbCPZIxrTVsNJAhbhe4RnFmvibdkJLvzg/edit?gid=1350094138#gid=1350094138"
+
+        name = self.group.name
+
+        return url, name
 
     async def run(self):
         """
         Get and export the expenses and return the message to send to the user
         """
+
+        try:
+            only_beta_users(self.user.username)
+        except UserNotAuthorized:
+            return "Este comando está en beta. Solo usuarios autorizados pueden ejecutarlo."
+
         expenses = await self.get_expenses_table()
 
+        sheet_url, worksheet_name = await self.export_to_google_sheet(expenses)
 
-        for e in expenses:
-            print(e)
-            print("--")
+        text = "Exportado con éxito!\n\n"
+        text += f"- Link de la hoja de cálculo: {sheet_url} \n\n"
+        text += f"- Nombre de la nueva pestaña: *\"{worksheet_name}\"*."
 
-        await self.export_to_google_sheet(expenses)
+        return text
 
-        return "done"
