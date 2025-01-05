@@ -1,4 +1,6 @@
+from django.db import connection
 from django.db.models import Func, F, ExpressionWrapper, FloatField
+from django.db.models.expressions import RawSQL
 
 from expenses.models import Expense
 from gastitis.exceptions import NoExpensesInChat
@@ -17,21 +19,38 @@ class ExportExpenses:
         """
         group_expenses_qs = Expense.objects.filter(group=self.group, **self.expense_filters)
         group_expenses_qs = group_expenses_qs.select_related("user").prefetch_related("tags")
+        group_expenses_qs = self._fix_qs_format_to_serialization(group_expenses_qs)
 
-        group_expenses_qs = group_expenses_qs.annotate(
-            formatted_date=Func(
-                F("date"),
-                function="TO_CHAR",
-                template="TO_CHAR(%(expressions)s, 'YYYY-MM-DD')",
+        if not await group_expenses_qs.aexists():
+            raise NoExpensesInChat()
 
+        return group_expenses_qs
+
+    def _fix_qs_format_to_serialization(self, group_expenses_qs):
+        db_backend = connection.vendor
+
+        if db_backend == "postgresql":
+            group_expenses_qs = group_expenses_qs.annotate(
+                formatted_date=Func(
+                    F("date"),
+                    function="TO_CHAR",
+                    template="TO_CHAR(%(expressions)s, 'YYYY/MM/DD')",
+
+                )
             )
-        )
+        else:
+            # Assume SQLite db, TO_CHAR doesn't work
+            group_expenses_qs = group_expenses_qs.annotate(
+                formatted_date=RawSQL("'Error (not valid in sqlite)'", [])
+            )
+
         group_expenses_qs = group_expenses_qs.annotate(
             amount_as_float=ExpressionWrapper(
                 F("amount"),
                 output_field=FloatField()
             )
         )
+
         group_expenses_qs = group_expenses_qs.values_list(
             "formatted_date",
             "user__username",
@@ -39,10 +58,8 @@ class ExportExpenses:
             "amount_as_float",
         )
 
-        if not await group_expenses_qs.aexists():
-            raise NoExpensesInChat()
-
         return group_expenses_qs
+
 
     async def get_expenses_table(self):
         table = [["fecha", "usuario", "gasto", "monto"]]
