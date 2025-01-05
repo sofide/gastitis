@@ -1,89 +1,116 @@
 # Gastitis
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 
-Gastitis is a Telegram bot to keep track of your expenses.
+**Gastitis** is a Telegram bot designed to help you track your expenses easily and efficiently.
+
+---
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine.
+Follow these instructions to get a copy of the project up and running on your local machine.
 
-### How to use
+### Usage
 
-Once you have your server setup, just start a chat with your bot using the Telegram client.
-For a description of available commands, use the `/help` command.
-
+Once your server is set up, start a chat with your bot using the Telegram client.  
+To see the available commands, use the `/help` command.
 
 ### Creating a Telegram Bot
 
-In order to test or deploy this project, first you have to talk to Bot Father to create your own
-bots. More details [here](https://core.telegram.org/bots#6-botfather).
+To test or deploy this project, you need to create your own bots via **BotFather**.  
+Refer to the [Telegram Bot documentation](https://core.telegram.org/bots#6-botfather) for detailed steps.
 
-I strongly recommend to create two bots: one for testing, to be used in your
-[dev environment](#setting-up-a-dev-environment) and another one for production, used in the
-[deployment](#deployment).
+It's recommended to create two bots:
+- **Testing Bot**: For use in your [development environment](#setting-up-a-dev-environment).
+- **Production Bot**: For deployment in your live environment.
 
+---
 
-### Setting up a dev environment
+## Setting Up a Development Environment
 
-First, you need to [create a testing Telegram Bot](#creating-a-telegram-bot).
-
-Once you have your testing bot, you need to create a file in `gastitis/secret_settings.py` with the
-following content with the token of your testing bot)
+### Prerequisites
+1. [Create a Testing Telegram Bot](#creating-a-telegram-bot).
+2. Prepare a configuration file at `gastitis/secret_settings.py` with the following content:
 
 ```python
-TELEGRAM_BOT_TOKEN = '' # place here your bot token
+TELEGRAM_BOT_TOKEN = ''  # Place your bot token here.
 
-DJANGO_SECRET_KEY = '' # place here a django secret_key (https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key)
+DJANGO_SECRET_KEY = ''  # Generate a Django secret key (see https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key).
 
-DATABASE_SETTINGS = None  # Set this setting in 'None' if you want to run gastitis with sqlite
+DATABASE_SETTINGS = None  # Use 'None' to run Gastitis with SQLite.
 
-DATABASE_SETTINGS = {  # Use this configs if you want to setup a specific database
+DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., PostgreSQL).
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': '',  # database name
-    'USER': '',  # database user
-    'PASSWORD': '', # database password
+    'NAME': '',  # Database name.
+    'USER': '',  # Database username.
+    'PASSWORD': '',  # Database password.
     'HOST': '127.0.0.1',
     'PORT': '5432',
 }
-```
 
-Note: If you want to setup a specific database like postgreSQL, check out the section [DATABASE_SETUP](docs/database_setup.md).
+>  Note: For setting up a specific database like PostgreSQL, refer to the Database Setup Guide.
 
-Next, you have to create a new virtual environment, install the requirements, run the migrations
-and start the dev bot:
-```
+### Setting Up Google Credentials for the /export Command
+The `/export` command requires Google credentials. Follow these steps to set them up:
+
+1. Create a Google service account following the gspread documentation.
+2. Download the credentials JSON file provided by Google.
+3. Save the JSON file to the following location: gastitis/google_credentials.json.
+
+
+### Installation Steps
+
+1. Create a virtual environment and activate it:
+```bash
 python3 -m venv env
 source env/bin/activate
+```
+
+2. Install the required dependencies:
+```bash
 pip install -r requirements.txt
+```
+
+3. Apply database migrations:
+```bash
 python manage.py migrate
+```
+
+4. Start your bot:
+```bash
 python manage.py startbot
 ```
-Now you can talk to your bot in telegram! Send your bot `/help` to see the available commands.
+You can now interact with your bot in Telegram! Use /help to see the available commands.
 
-If you want to watch the expenses you have load, or any other information saved by your bot, you
-need to create a super user:
-```
+### Accessing the Admin Panel
+
+If you want to view the expenses you've added or any other data stored by your bot, you need to create 
+a superuser for the Django admin panel:
+
+1. Create a superuser:
+```bash
 python manage.py createsuperuser
 ```
-Follow the prompt steps and create a user, then run the web locally:
-```
+
+2. Run the development server:
+```bash
 python manage.py runserver
 ```
-From your browser, go to http://localhost:8000/admin enter your username and password (created in
-the previous step) and now you can explore the data that your bot has generated!
+
+3. Access the admin panel: Open your browser and go to http://localhost:8000/admin. Log in with the superuser 
+credentials you created in the previous step.
+
+You can now explore the data your bot has generated!
+
 
 ### Extra Optional Steps: Configure Your Telegram Bot
 
-Enhance your Telegram bot's functionality by customizing its settings. Follow the instructions 
-in the [Bot Manual Settings](docs/bot_manual_settings.md) for detailed guidance.
-
+Enhance your Telegram bot's functionality by customizing its settings. Follow the instructions in the [Bot Manual Settings](docs/bot_manual_settings.md) for detailed guidance.  
 
 ## Contributing
 
 - After making any changes to the code, please run the [functional tests](docs/functional_testing.md) to ensure everything is working as expected.
 - If you are adding a new command, follow the instructions in the [Create a New Command](docs/create_new_command.md) section.
-
 
 ## Authors
 
