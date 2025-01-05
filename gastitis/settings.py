@@ -16,6 +16,7 @@ try:
         TELEGRAM_BOT_TOKEN,
         DJANGO_SECRET_KEY,
         DATABASE_SETTINGS,
+        BETA_USERS,
     )
 
 except ModuleNotFoundError as e:
@@ -145,5 +146,3 @@ SITE_DOMAIN = 'http://127.0.0.1:8000'
 BOT_TOKEN = TELEGRAM_BOT_TOKEN
 
 print(f"Connecting to database {DATABASES['default']['NAME']}" )
-
-BETA_USERS = []
