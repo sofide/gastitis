@@ -6,6 +6,8 @@ from functools import wraps
 
 import gspread
 
+from gastitis.exceptions import GoogleAPIConnectionError
+
 CREDENTIALS_FILE = "gastitis/google_credentials.json"
 
 
@@ -19,15 +21,32 @@ def asyncify(func):
         return await loop.run_in_executor(None, func, *args, **kwargs)
     return wrapper
 
+def handle_google_connection_error(func):
+    """
+    Decorator to handle errors in the connection with Google API.
+
+    Only use this decorator in functions that wrap google calls, without other logic.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as error:
+            raise GoogleAPIConnectionError() from error
+
+    return wrapper
+
 
 class GoogleClient:
     @asyncify
+    @handle_google_connection_error
     def _get_service_account(self):
         if not hasattr(self, "_service_account"):
             self._service_account = gspread.service_account(filename=CREDENTIALS_FILE)
         return self._service_account
 
     @asyncify
+    @handle_google_connection_error
     def _get_sheet_from_google(self, service_account, sheet_url):
         return service_account.open_by_url(sheet_url)
 
@@ -36,10 +55,12 @@ class GoogleClient:
         return await self._get_sheet_from_google(service_account, sheet_url)
 
     @asyncify
+    @handle_google_connection_error
     def create_empty_worksheet(self, sheet, worksheet_name):
         return sheet.add_worksheet(worksheet_name, rows=1, cols=1)
 
     @asyncify
+    @handle_google_connection_error
     def save_data_in_worksheet(self, worksheet, data):
         worksheet.update(data, "A1")
 

@@ -1,10 +1,12 @@
+import logging
+
 from django.conf import settings
 from django.db import connection
 from django.db.models import Func, F, ExpressionWrapper, FloatField
 from django.db.models.expressions import RawSQL
 
 from expenses.models import Expense
-from gastitis.exceptions import NoExpensesInChat, UserNotAuthorized
+from gastitis.exceptions import NoExpensesInChat, UserNotAuthorized, GoogleAPIConnectionError
 from services.google_sheets import GoogleSheet
 
 def only_beta_users(username):
@@ -107,7 +109,14 @@ class ExportExpenses:
 
         expenses = await self.get_expenses_table()
 
-        sheet_url, worksheet_name = await self.export_to_google_sheet(expenses)
+        try:
+            sheet_url, worksheet_name = await self.export_to_google_sheet(expenses)
+        except GoogleAPIConnectionError:
+            logging.exception("Google API error - Check your credentials")
+            return "Hubo un problema al intentar exportar (Error de conexión con API Google)"
+        except Exception:
+            logging.exception("Unhandled error")
+            return "Hubo un problema al intentar exportar."
 
         text = "Exportado con éxito!\n\n"
         text += f"- Link de la hoja de cálculo: {sheet_url} \n\n"
