@@ -1,4 +1,6 @@
-# Setup databae in postgres container
+# Database setup Guide
+
+Follow this guide to set up a databae in postgres container.
 
 ## Run a postgres container
 

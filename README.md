@@ -1,19 +1,15 @@
 # Gastitis
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 
 **Gastitis** is a Telegram bot designed to help you track your expenses easily and efficiently.
 
 ---
 
-## Getting Started
+## Setting Up a Development Environment
+
 
 Follow these instructions to get a copy of the project up and running on your local machine.
-
-### Usage
-
-Once your server is set up, start a chat with your bot using the Telegram client.  
-To see the available commands, use the `/help` command.
 
 ### Creating a Telegram Bot
 
@@ -24,13 +20,9 @@ It's recommended to create two bots:
 - **Testing Bot**: For use in your [development environment](#setting-up-a-dev-environment).
 - **Production Bot**: For deployment in your live environment.
 
----
+### Creating a settings file 
 
-## Setting Up a Development Environment
-
-### Prerequisites
-1. [Create a Testing Telegram Bot](#creating-a-telegram-bot).
-2. Prepare a configuration file at `gastitis/secret_settings.py` with the following content:
+Prepare a configuration file at `gastitis/secret_settings.py` with the following content:
 
 ```python
 TELEGRAM_BOT_TOKEN = ''  # Place your bot token here.
@@ -47,8 +39,9 @@ DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., Postg
     'HOST': '127.0.0.1',
     'PORT': '5432',
 }
+```
 
->  Note: For setting up a specific database like PostgreSQL, refer to the Database Setup Guide.
+>  Note: For setting up a specific database like PostgreSQL, refer to the [Database Setup Guide](docs/database_setup.md).
 
 ### Setting Up Google Credentials for the /export Command
 The `/export` command requires Google credentials. Follow these steps to set them up:
