@@ -16,6 +16,7 @@ try:
         TELEGRAM_BOT_TOKEN,
         DJANGO_SECRET_KEY,
         DATABASE_SETTINGS,
+        BETA_USERS,
     )
 
 except ModuleNotFoundError as e:
