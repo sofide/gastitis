@@ -18,6 +18,7 @@ docker images
 ```
 docker run -d \
     --name postgres-sofi \
+    --restart unless-stopped \
     -e POSTGRES_PASSWORD=<secret-password> \
     -v </path/until/local/directory/volume>:/var/lib/postgresql/data \
     -v </path/until/local/directory/volume>:/backups \
