@@ -102,6 +102,10 @@ You can now explore the data your bot has generated!
 
 Enhance your Telegram bot's functionality by customizing its settings. Follow the instructions in the [Bot Manual Settings](docs/bot_manual_settings.md) for detailed guidance.  
 
+## Keep gastitis running in a server
+
+Follow the steps in ["keep_bot_running_in_server"](docs/keep_bot_running_in_server.md) to keep gastitis always running in your pc or server.
+
 ## Contributing
 
 - After making any changes to the code, please run the [functional tests](docs/functional_testing.md) to ensure everything is working as expected.
