@@ -18,6 +18,7 @@ from bot.utils import (
 )
 from expenses.models import Expense
 from extra_features.asado import how_much_asado_message
+from extra_features.vianda import ViandaMessage
 from use_cases.export import ExportExpenses
 
 
@@ -96,6 +97,15 @@ async def export(update, context, user, group):
     )
 
 
+async def vianda(update, context):
+    vianda_message = ViandaMessage(*context.args)
+
+    text = vianda_message.message()
+    await context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
+
+
 async def unknown(update, context):
     text = "Perdón, ese comando no lo entiendo. Si no sabés que hacer, /help."
     await context.bot.send_message(chat_id=update.message.chat_id, text=text)
@@ -115,5 +125,6 @@ HANDLERS = [
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
     CommandHandler('exportar', export),
+    CommandHandler('vianda', vianda),
     MessageHandler(filters.COMMAND, unknown),
 ]
