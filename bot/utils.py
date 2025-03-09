@@ -333,10 +333,11 @@ async def get_month_expenses(group, year, month):
     first_day_of_month = dt.date(year, month, 1)
     if month == 12:
         next_month = 1
-        year += 1
+        next_month_year = year + 1
     else:
         next_month = month + 1
-    first_day_of_next_month = dt.date(year, next_month, 1)
+        next_month_year = year
+    first_day_of_next_month = dt.date(next_month_year, next_month, 1)
 
     expense_filters = {
         'date__gte': first_day_of_month,
