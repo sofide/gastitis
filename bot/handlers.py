@@ -97,6 +97,16 @@ async def export(update, context, user, group):
     )
 
 
+@user_and_group
+async def export_month(update, context, user, group):
+    exporter = ExportExpenses(user, group, month_params=context.args)
+
+    text = await exporter.run()
+    await context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
+
+
 async def vianda(update, context):
     vianda_message = ViandaMessage(*context.args)
 
@@ -125,6 +135,7 @@ HANDLERS = [
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
     CommandHandler('exportar', export),
+    CommandHandler('exportar_mes', export_month),
     CommandHandler('vianda', vianda),
     MessageHandler(filters.COMMAND, unknown),
 ]

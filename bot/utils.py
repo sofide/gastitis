@@ -329,7 +329,7 @@ async def show_expenses(group, **expense_filters):
     return text
 
 
-async def get_month_expenses(group, year, month):
+def filter_by_month(year, month):
     first_day_of_month = dt.date(year, month, 1)
     if month == 12:
         next_month = 1
@@ -339,10 +339,15 @@ async def get_month_expenses(group, year, month):
         next_month_year = year
     first_day_of_next_month = dt.date(next_month_year, next_month, 1)
 
-    expense_filters = {
+    return {
         'date__gte': first_day_of_month,
         'date__lt': first_day_of_next_month,
     }
+
+
+async def get_month_expenses(group, year, month):
+    expense_filters = filter_by_month(year, month)
+
     text = "Gastos del mes {} del año {}\n\n".format(month, year)
     text += await show_expenses(group, **expense_filters)
     return text

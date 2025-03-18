@@ -5,6 +5,7 @@ from django.db import connection
 from django.db.models import Func, F, ExpressionWrapper, FloatField
 from django.db.models.expressions import RawSQL
 
+from bot.utils import get_month_and_year, filter_by_month
 from expenses.models import Expense
 from gastitis.exceptions import NoExpensesInChat, UserNotAuthorized, GoogleAPIConnectionError
 from services.google_sheets import GoogleSheet
@@ -19,10 +20,16 @@ def only_beta_users(username):
 
 class ExportExpenses:
 
-    def __init__(self, user, group, **expense_filters):
+    def __init__(self, user, group, month_params=None):
         self.user = user
         self.group = group
-        self.expense_filters = expense_filters
+        self.expense_filters ={}
+        self.human_friendly_filters = ""
+
+        if month_params is not None:
+            month, year = get_month_and_year(month_params)
+            self.human_friendly_filters += f"Mes: {month} - Año: {year}\n"
+            self.expense_filters.update(filter_by_month(year, month))
 
     async def get_expenses(self):
         """
@@ -104,13 +111,13 @@ class ExportExpenses:
 
         try:
             only_beta_users(self.user.username)
+            expenses = await self.get_expenses_table()
+            sheet_url, worksheet_name = await self.export_to_google_sheet(expenses)
+
         except UserNotAuthorized:
             return "Este comando está en beta. Solo usuarios autorizados pueden ejecutarlo."
-
-        expenses = await self.get_expenses_table()
-
-        try:
-            sheet_url, worksheet_name = await self.export_to_google_sheet(expenses)
+        except NoExpensesInChat:
+            return f"No hay gastos para exportar. {self.human_friendly_filters}"
         except GoogleAPIConnectionError:
             logging.exception("Google API error - Check your credentials")
             return "Hubo un problema al intentar exportar (Error de conexión con API Google)"
