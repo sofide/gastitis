@@ -48,7 +48,7 @@ BETA_USERS = ['your_telegram_username']  # List of Telegram usernames allowed to
 ### Setting Up Google Credentials for the /export Command
 The `/export` command requires Google credentials. Follow these steps to set them up:
 
-1. Create a Google service account following the gspread documentation.
+1. Create a Google service account following the [gspread documentation](https://docs.gspread.org/en/v6.1.3/oauth2.html#service-account).
 2. Download the credentials JSON file provided by Google.
 3. Save the JSON file to the following location: gastitis/google_credentials.json.
 
