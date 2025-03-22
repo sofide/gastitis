@@ -27,11 +27,11 @@ Prepare a configuration file at `gastitis/secret_settings.py` with the following
 ```python
 TELEGRAM_BOT_TOKEN = ''  # Place your bot token here.
 
-DJANGO_SECRET_KEY = ''  # Generate a Django secret key (see https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key).
+DJANGO_SECRET_KEY = ''  # Generate a Django secret key (any random string) (see https://docs.djangoproject.com/en/4.1/ref/settings/#secret-key).
 
-DATABASE_SETTINGS = None  # Use 'None' to run Gastitis with SQLite.
+SQLITE_DATABASE_SETTINGS = None  # Use 'None' to run Gastitis with SQLite.
 
-DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., PostgreSQL).
+POSTGRESQL_DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., PostgreSQL).
     'ENGINE': 'django.db.backends.postgresql',
     'NAME': '',  # Database name.
     'USER': '',  # Database username.
@@ -39,6 +39,8 @@ DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., Postg
     'HOST': '127.0.0.1',
     'PORT': '5432',
 }
+
+DATABASE_SETTINGS = SQLITE_DATABASE_SETTINGS  # Choose SQLITE_DATABASE_SETTINGS or POSTGRESQL_DATABASE_SETTINGS
 
 BETA_USERS = ['your_telegram_username']  # List of Telegram usernames allowed to access beta features and commands
 ```
