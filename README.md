@@ -41,6 +41,8 @@ DATABASE_SETTINGS = {  # Use these settings for a specific database (e.g., Postg
 }
 
 BETA_USERS = ['your_telegram_username']  # List of Telegram usernames allowed to access beta features and commands
+
+GOOGLE_SHEET_URL = ''  # Place URL to Google Sheet for use in export command
 ```
 
 >  Note: For setting up a specific database like PostgreSQL, refer to the [Database Setup Guide](docs/database_setup.md).
