@@ -2,8 +2,9 @@ import logging
 
 from django.conf import settings
 from django.db import connection
-from django.db.models import Func, F, ExpressionWrapper, FloatField
+from django.db.models import Func, F, ExpressionWrapper, FloatField, CharField
 from django.db.models.expressions import RawSQL
+from django.db.models.functions import Cast
 
 from expenses.models import Expense
 from gastitis.exceptions import NoExpensesInChat, UserNotAuthorized, GoogleAPIConnectionError
@@ -52,7 +53,7 @@ class ExportExpenses:
         else:
             # Assume SQLite db, TO_CHAR doesn't work
             group_expenses_qs = group_expenses_qs.annotate(
-                formatted_date=RawSQL("'Error (not valid in sqlite)'", [])
+                formatted_date=Cast('date', CharField())
             )
 
         group_expenses_qs = group_expenses_qs.annotate(
