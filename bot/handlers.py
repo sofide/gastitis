@@ -11,6 +11,7 @@ from bot.utils import (
     get_month_expenses,
     get_month_and_year,
     is_group,
+    get_month_filters,
     new_expense,
     new_payment,
     show_expenses,
@@ -97,6 +98,18 @@ async def export(update, context, user, group):
     )
 
 
+@user_and_group
+async def export_month(update, context, user, group):
+    month, year = get_month_and_year(context.args)
+    expense_filters = get_month_filters(year, month)
+    extra_name = f"{year}-{month}"
+    exporter = ExportExpenses(user, group, extra_name, **expense_filters)
+    text = await exporter.run()
+    await context.bot.send_message(
+        chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
+    )
+
+
 async def vianda(update, context):
     vianda_message = ViandaMessage(*context.args)
 
@@ -125,6 +138,7 @@ HANDLERS = [
     CommandHandler('asado', calc_asado),
     CommandHandler('a', calc_asado),
     CommandHandler('exportar', export),
+    CommandHandler('exportar_mes', export_month),
     CommandHandler('vianda', vianda),
     MessageHandler(filters.COMMAND, unknown),
 ]

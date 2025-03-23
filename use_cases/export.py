@@ -19,10 +19,11 @@ def only_beta_users(username):
 
 class ExportExpenses:
 
-    def __init__(self, user, group, **expense_filters):
+    def __init__(self, user, group, extra_name, **expense_filters):
         self.user = user
         self.group = group
         self.expense_filters = expense_filters
+        self.extra_name = extra_name
 
     async def get_expenses(self):
         """
@@ -93,7 +94,7 @@ class ExportExpenses:
         # TODO: save urls in db by group
         url = "https://docs.google.com/spreadsheets/d/1YimK1TlwjzfbCPZIxrTVsNJAhbhe4RnFmvibdkJLvzg/edit?gid=1350094138#gid=1350094138"
 
-        name = self.group.name
+        name = f"{self.group.name}@{self.extra_name}"
 
         return url, name
 
@@ -123,4 +124,3 @@ class ExportExpenses:
         text += f"- Nombre de la nueva pestaña: *\"{worksheet_name}\"*."
 
         return text
-
