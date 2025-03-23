@@ -103,7 +103,7 @@ async def export_month(update, context, user, group):
     month, year = get_month_and_year(context.args)
     expense_filters = get_month_filters(year, month)
     extra_name = f"{year}-{month}"
-    exporter = ExportExpenses(user, group, extra_name, **expense_filters)
+    exporter = ExportExpenses(user, group, extra_name, expense_filters)
     text = await exporter.run()
     await context.bot.send_message(
         chat_id=update.message.chat_id, text=text, parse_mode=ParseMode.MARKDOWN
