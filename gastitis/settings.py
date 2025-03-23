@@ -145,4 +145,8 @@ SITE_DOMAIN = 'http://127.0.0.1:8000'
 # Telegram Settings
 BOT_TOKEN = TELEGRAM_BOT_TOKEN
 
+# Default auto field for django id
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 print(f"Connecting to database {DATABASES['default']['NAME']}" )
+
