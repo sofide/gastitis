@@ -92,7 +92,7 @@ class ExportExpenses:
 
     def get_sheet_url_and_name(self):
         # TODO: save urls in db by group
-        url = "https://docs.google.com/spreadsheets/d/1YimK1TlwjzfbCPZIxrTVsNJAhbhe4RnFmvibdkJLvzg/edit?gid=1350094138#gid=1350094138"
+        url = settings.GOOGLE_SHEET_URL
 
         name = self.group.name
 
