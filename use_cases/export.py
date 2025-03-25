@@ -20,10 +20,11 @@ def only_beta_users(username):
 
 class ExportExpenses:
 
-    def __init__(self, user, group, **expense_filters):
+    def __init__(self, user, group, extra_name=None, expense_filters=None):
         self.user = user
         self.group = group
-        self.expense_filters = expense_filters
+        self.expense_filters = expense_filters if expense_filters is not None else {}
+        self.extra_name = extra_name
 
     async def get_expenses(self):
         """
@@ -95,6 +96,8 @@ class ExportExpenses:
         url = settings.GOOGLE_SHEET_URL
 
         name = self.group.name
+        if self.extra_name:
+            name += f"@{self.extra_name}"
 
         return url, name
 
@@ -124,4 +127,3 @@ class ExportExpenses:
         text += f"- Nombre de la nueva pestaña: *\"{worksheet_name}\"*."
 
         return text
-
