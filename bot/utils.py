@@ -184,6 +184,49 @@ async def decode_expense_params(params, group):
 
     return data
 
+async def decode_payments_params(params,user,group):
+    """
+    Process command params in payment's attributes, and return a dict with the following data:
+    amount = expense amount
+    date = date
+    to_user = User
+    """
+    result = {}
+    if len(params) == 3:
+        try:
+            date = parse_date(params.pop(-1), DATE_INPUT_FORMATS)
+        except DateFormatterError:
+            example_date = dt.date.today()
+            formated_dates = [dt.datetime.strftime(example_date, format) for format in DATE_INPUT_FORMATS]
+            date_bullets = '\n - '.join(formated_dates)
+            text = f'El formato de fecha no es correcto. ' \
+                   f'Por ejemplo a la fecha de hoy la podés escribir en cualquiera ' \
+                   f'de los siguientes formatos: \n - {date_bullets}'
+            raise ParameterError(text)
+    else:
+        date = dt.date.today().strftime("%Y-%m-%d")
+    result["date"] = date
+    try:
+        amount, to_user = params
+        amount = float(amount)
+        if to_user.startswith("@"):
+            to_user = to_user[1:]
+        to_user = await User.objects.exclude(pk=user.pk).aget(username=to_user, telegram_groups=group)
+        result["amount"] =amount
+        result["to_user"] = to_user
+    except ValueError:
+        text =  "El primer argumento debe ser el monto a pagar, y el segundo argumento el "\
+                "username del usuario al que le estás pagando. \n\n"\
+                "Opcionalmente puede contener un tercer argumento con la fecha en la que se "\
+                "desea  computar el gasto, con el formato dd/mm/yy."
+        raise ParameterError(text)
+    except User.DoesNotExist:
+        text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
+        text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
+        async for member in group.users.exclude(pk=user.pk):
+            text += "- {}\n".format(member.username)
+        raise ParameterError(text)
+    return result
 
 async def get_amount_and_currency(raw_amount):
     """
@@ -241,41 +284,21 @@ async def new_payment(params, update, user, group):
                "un único miembro, por lo que no se pueden realizar pagos."
         return text
 
-    DATE_FORMAT = '%d/%m/%y'
-    if len(params) == 3:
-        date = params.pop(-1)
-    else:
-        date = dt.date.today().strftime(DATE_FORMAT)
     try:
-        amount, to_user = params
-        amount = float(amount)
-        if to_user.startswith("@"):
-            to_user = to_user[1:]
-        to_user = await User.objects.exclude(pk=user.pk).aget(username=to_user, telegram_groups=group)
-        date = dt.datetime.strptime(date, DATE_FORMAT)
-    except ValueError:
-        text =  "El primer argumento debe ser el monto a pagar, y el segundo argumento el "\
-                "username del usuario al que le estás pagando. \n\n"\
-                "Opcionalmente puede contener un tercer argumento con la fecha en la que se "\
-                "desea  computar el gasto, con el formato dd/mm/yy."
-        return text
-    except User.DoesNotExist:
-        text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
-        text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
-        async for member in group.users.exclude(pk=user.pk):
-            text += "- {}\n".format(member.username)
-        return text
+        data = await decode_payments_params(params,user, group)
+    except ParameterError as e:
+        return str(e)
 
     payment_details = {
         'from_user': user,
-        'to_user': to_user,
+        'to_user': data['to_user'],
         'group': group,
-        'amount': amount,
-        'date': date,
+        'amount': data['amount'],
+        'date': data['date'],
     }
     payment = await Payment.objects.acreate(**payment_details)
 
-    return "Se ha registrado su pago a {} por ${} en la fecha {}".format(to_user, amount, date)
+    return "Se ha registrado su pago a {} por ${} en la fecha {}".format(data['to_user'], data['amount'], data['date'])
 
 
 async def show_expenses(group, **expense_filters):
