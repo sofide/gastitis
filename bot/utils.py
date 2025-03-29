@@ -219,13 +219,13 @@ async def decode_payments_params(params,user,group):
                 "username del usuario al que le estás pagando. \n\n"\
                 "Opcionalmente puede contener un tercer argumento con la fecha en la que se "\
                 "desea  computar el gasto, con el formato dd/mm/yy."
-        return text
+        raise ParameterError(text)
     except User.DoesNotExist:
         text = "El usuario espcificado ({}) no existe dentro de este grupo. \n".format(to_user)
         text += "Los posibles usuarios a los que les podes cargar un pago son: \n"
         async for member in group.users.exclude(pk=user.pk):
             text += "- {}\n".format(member.username)
-        return text
+        raise ParameterError(text)
     return result
 
 async def get_amount_and_currency(raw_amount):
