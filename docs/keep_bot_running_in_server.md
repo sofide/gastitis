@@ -60,3 +60,22 @@ To debug or monitor the program's output, view the logs:
 tail -f /var/log/gastitis.out.log
 tail -f /var/log/gastitis.err.log
 ```
+
+## 7. Deploy new changes
+
+When you make changes to the code, you need to pull the latest changes from your repository.
+```bash
+git pull origin master
+```
+
+Then, restart the bot:
+
+```bash
+sudo supervisorctl restart gastitis
+```
+
+Check the bot is running correctly:
+
+```bash
+sudo supervisorctl status
+```
