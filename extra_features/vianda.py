@@ -20,8 +20,8 @@ class ViandaCostCalculator:
     2 viandas per day.
     """
 
-    FOOD_COST = 4500
-    DELIVERY_COST = 800
+    FOOD_COST = 5000
+    DELIVERY_COST = 900
     COSTS_LAST_UPDATED = "2025/02/09"
 
     DEFAULT_DAYS = 5
